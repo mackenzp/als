@@ -6,8 +6,8 @@ Deep Neural Network trained based on boolean difference calculus to predict the 
 Type './als' to run the als executable
 
 ## Compiling:
-ALS utilizes Berkeley's open-source synthesis tool "ABC" for initial exact technology mapping and feature extraction.
-ABC is compiled, but to re-compile ABC type 'make clean' and then 'make'.
+ALS utilizes Berkeley's open-source synthesis tool "ABC" as a base platform for initial exact technology mapping and feature extraction.
+The modified version of ABC is compiled, but to re-compile ABC type 'make clean' and then 'make'.
 
 <br>
 
