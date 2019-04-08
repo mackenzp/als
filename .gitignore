@@ -9,12 +9,6 @@ run.txt/
 train_data.txt/
 gate_error.txt/
 final_error.txt/
-/run.txt
-/train_data.txt
-/original.bench
-/original.blif
-/node_edges.txt
-/node_types.txt
 *.dot
 *.o
 *.d
