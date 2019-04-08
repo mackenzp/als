@@ -4,7 +4,12 @@ c1355.bench
 c17.bench
 c18.bench
 c1908.bench
+c2670.bench
+c3540.bench
 c432.bench
 c499.bench
+c5315.bench
+c6288.bench
+c7552.bench
 c880.bench
 c8.blif

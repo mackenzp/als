@@ -128,6 +128,7 @@ Additionally, the global MHD was corrected from the previous implementation:
 GMHD = (sum(total_error on primary outputs)) / (no. of outputs)
 
 ### abcShow.c
+##### src/base/abc/abcShow.c
 The following code was inserted to extract the node features whenever the command
 “show” is provided by the user. Each node and its (m) number of features will also have an attached
 num_fanouts*(m) features and num_fanins*(m) features attached, with a max num_fanouts
