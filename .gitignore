@@ -1,0 +1,14 @@
+/venv/
+/error_test/
+/.idea/**
+/q-learning/
+node_types.txt/
+original.bench/
+original.blif/
+run.txt/
+train_data.txt/
+gate_error.txt/
+final_error.txt/
+*.dot
+*.o
+*.d

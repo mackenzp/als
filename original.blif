@@ -1,0 +1,225 @@
+# Benchmark "benchfolder/ISCAS85/c499" written by ABC on Sat Apr  6 19:05:38 2019
+.model benchfolder/ISCAS85/c499
+.inputs 1 5 9 13 17 21 25 29 33 37 41 45 49 53 57 61 65 69 73 77 81 85 89 \
+ 93 97 101 105 109 113 117 121 125 129 130 131 132 133 134 135 136 137
+.outputs 724 725 726 727 728 729 730 731 732 733 734 735 736 737 738 739 \
+ 740 741 742 743 744 745 746 747 748 749 750 751 752 753 754 755
+.gate inv1   a=1 O=n74
+.gate xor2a  a=17 b=1 O=n75
+.gate xor2a  a=49 b=33 O=n76
+.gate xor2a  a=n76 b=n75 O=n77
+.gate inv1   a=n77 O=n78
+.gate nand2  a=137 b=129 O=n79
+.gate xor2a  a=69 b=65 O=n80
+.gate xor2a  a=77 b=73 O=n81
+.gate xor2a  a=n81 b=n80 O=n82
+.gate xor2a  a=85 b=81 O=n83
+.gate xor2a  a=93 b=89 O=n84
+.gate xor2a  a=n84 b=n83 O=n85
+.gate xor2a  a=n85 b=n82 O=n86
+.gate xor2a  a=n86 b=n79 O=n87
+.gate xor2a  a=n87 b=n78 O=n88
+.gate xor2a  a=n87 b=n77 O=n89
+.gate xor2a  a=29 b=13 O=n90
+.gate xor2a  a=61 b=45 O=n91
+.gate xor2a  a=n91 b=n90 O=n92
+.gate nand2  a=137 b=132 O=n93
+.gate xor2a  a=117 b=113 O=n94
+.gate xor2a  a=125 b=121 O=n95
+.gate xor2a  a=n95 b=n94 O=n96
+.gate xor2a  a=n96 b=n85 O=n97
+.gate xor2a  a=n97 b=n93 O=n98
+.gate xor2a  a=n98 b=n92 O=n99
+.gate xor2a  a=25 b=9 O=n100
+.gate xor2a  a=57 b=41 O=n101
+.gate xor2a  a=n101 b=n100 O=n102
+.gate nand2  a=137 b=131 O=n103
+.gate xor2a  a=101 b=97 O=n104
+.gate xor2a  a=109 b=105 O=n105
+.gate xor2a  a=n105 b=n104 O=n106
+.gate xor2a  a=n106 b=n82 O=n107
+.gate xor2a  a=n107 b=n103 O=n108
+.gate xor2a  a=n108 b=n102 O=n109
+.gate xor2a  a=21 b=5 O=n110
+.gate xor2a  a=53 b=37 O=n111
+.gate xor2a  a=n111 b=n110 O=n112
+.gate inv1   a=n112 O=n113
+.gate nand2  a=137 b=130 O=n114
+.gate xor2a  a=n106 b=n96 O=n115
+.gate xor2a  a=n115 b=n114 O=n116
+.gate xor2a  a=n116 b=n113 O=n117
+.gate nand4  a=n117 b=n109 c=n99 d=n89 O=n118
+.gate xor2a  a=n116 b=n112 O=n119
+.gate nand4  a=n119 b=n109 c=n99 d=n88 O=n120
+.gate inv1   a=n92 O=n121
+.gate xor2a  a=n98 b=n121 O=n122
+.gate nand4  a=n119 b=n109 c=n122 d=n89 O=n123
+.gate inv1   a=n102 O=n124
+.gate xor2a  a=n108 b=n124 O=n125
+.gate nand4  a=n119 b=n125 c=n99 d=n89 O=n126
+.gate nand4  a=n126 b=n123 c=n120 d=n118 O=n127
+.gate xor2a  a=81 b=65 O=n128
+.gate xor2a  a=113 b=97 O=n129
+.gate xor2a  a=n129 b=n128 O=n130
+.gate inv1   a=n130 O=n131
+.gate nand2  a=137 b=133 O=n132
+.gate xor2a  a=21 b=17 O=n133
+.gate xor2a  a=29 b=25 O=n134
+.gate xor2a  a=n134 b=n133 O=n135
+.gate xor2a  a=5 b=1 O=n136
+.gate xor2a  a=13 b=9 O=n137
+.gate xor2a  a=n137 b=n136 O=n138
+.gate xor2a  a=n138 b=n135 O=n139
+.gate xor2a  a=n139 b=n132 O=n140
+.gate xor2a  a=n140 b=n131 O=n141
+.gate xor2a  a=85 b=69 O=n142
+.gate xor2a  a=117 b=101 O=n143
+.gate xor2a  a=n143 b=n142 O=n144
+.gate nand2  a=137 b=134 O=n145
+.gate xor2a  a=53 b=49 O=n146
+.gate xor2a  a=61 b=57 O=n147
+.gate xor2a  a=n147 b=n146 O=n148
+.gate xor2a  a=37 b=33 O=n149
+.gate xor2a  a=45 b=41 O=n150
+.gate xor2a  a=n150 b=n149 O=n151
+.gate xor2a  a=n151 b=n148 O=n152
+.gate xor2a  a=n152 b=n145 O=n153
+.gate xor2a  a=n153 b=n144 O=n154
+.gate xor2a  a=93 b=77 O=n155
+.gate xor2a  a=125 b=109 O=n156
+.gate xor2a  a=n156 b=n155 O=n157
+.gate nand2  a=137 b=136 O=n158
+.gate xor2a  a=n148 b=n135 O=n159
+.gate xor2a  a=n159 b=n158 O=n160
+.gate xor2a  a=n160 b=n157 O=n161
+.gate xor2a  a=89 b=73 O=n162
+.gate xor2a  a=121 b=105 O=n163
+.gate xor2a  a=n163 b=n162 O=n164
+.gate inv1   a=n164 O=n165
+.gate nand2  a=137 b=135 O=n166
+.gate xor2a  a=n151 b=n138 O=n167
+.gate xor2a  a=n167 b=n166 O=n168
+.gate xor2a  a=n168 b=n165 O=n169
+.gate nand4  a=n169 b=n161 c=n154 d=n141 O=n170
+.gate inv1   a=n170 O=n171
+.gate nand3  a=n171 b=n127 c=n88 O=n172
+.gate xor2a  a=n172 b=n74 O=724
+.gate inv1   a=5 O=n174
+.gate nand3  a=n171 b=n127 c=n117 O=n175
+.gate xor2a  a=n175 b=n174 O=725
+.gate inv1   a=9 O=n177
+.gate nand3  a=n171 b=n127 c=n125 O=n178
+.gate xor2a  a=n178 b=n177 O=726
+.gate inv1   a=13 O=n180
+.gate nand3  a=n171 b=n127 c=n122 O=n181
+.gate xor2a  a=n181 b=n180 O=727
+.gate inv1   a=17 O=n183
+.gate inv1   a=n157 O=n184
+.gate xor2a  a=n160 b=n184 O=n185
+.gate xor2a  a=n168 b=n164 O=n186
+.gate nand4  a=n186 b=n185 c=n154 d=n141 O=n187
+.gate inv1   a=n187 O=n188
+.gate nand3  a=n188 b=n127 c=n88 O=n189
+.gate xor2a  a=n189 b=n183 O=728
+.gate inv1   a=21 O=n191
+.gate nand3  a=n188 b=n127 c=n117 O=n192
+.gate xor2a  a=n192 b=n191 O=729
+.gate inv1   a=25 O=n194
+.gate nand3  a=n188 b=n127 c=n125 O=n195
+.gate xor2a  a=n195 b=n194 O=730
+.gate inv1   a=29 O=n197
+.gate nand3  a=n188 b=n127 c=n122 O=n198
+.gate xor2a  a=n198 b=n197 O=731
+.gate inv1   a=33 O=n200
+.gate xor2a  a=n140 b=n130 O=n201
+.gate inv1   a=n144 O=n202
+.gate xor2a  a=n153 b=n202 O=n203
+.gate nand4  a=n169 b=n161 c=n203 d=n201 O=n204
+.gate inv1   a=n204 O=n205
+.gate nand3  a=n205 b=n127 c=n88 O=n206
+.gate xor2a  a=n206 b=n200 O=732
+.gate inv1   a=37 O=n208
+.gate nand3  a=n205 b=n127 c=n117 O=n209
+.gate xor2a  a=n209 b=n208 O=733
+.gate inv1   a=41 O=n211
+.gate nand3  a=n205 b=n127 c=n125 O=n212
+.gate xor2a  a=n212 b=n211 O=734
+.gate inv1   a=45 O=n214
+.gate nand3  a=n205 b=n127 c=n122 O=n215
+.gate xor2a  a=n215 b=n214 O=735
+.gate inv1   a=49 O=n217
+.gate nand4  a=n186 b=n185 c=n203 d=n201 O=n218
+.gate inv1   a=n218 O=n219
+.gate nand3  a=n219 b=n127 c=n88 O=n220
+.gate xor2a  a=n220 b=n217 O=736
+.gate inv1   a=53 O=n222
+.gate nand3  a=n219 b=n127 c=n117 O=n223
+.gate xor2a  a=n223 b=n222 O=737
+.gate inv1   a=57 O=n225
+.gate nand3  a=n219 b=n127 c=n125 O=n226
+.gate xor2a  a=n226 b=n225 O=738
+.gate inv1   a=61 O=n228
+.gate nand3  a=n219 b=n127 c=n122 O=n229
+.gate xor2a  a=n229 b=n228 O=739
+.gate inv1   a=65 O=n231
+.gate nand4  a=n186 b=n161 c=n203 d=n201 O=n232
+.gate nand4  a=n186 b=n161 c=n154 d=n141 O=n233
+.gate nand4  a=n186 b=n185 c=n154 d=n201 O=n234
+.gate nand4  a=n169 b=n161 c=n154 d=n201 O=n235
+.gate nand4  a=n235 b=n234 c=n233 d=n232 O=n236
+.gate nand4  a=n119 b=n125 c=n99 d=n88 O=n237
+.gate inv1   a=n237 O=n238
+.gate nand3  a=n238 b=n236 c=n141 O=n239
+.gate xor2a  a=n239 b=n231 O=740
+.gate inv1   a=69 O=n241
+.gate nand3  a=n238 b=n236 c=n203 O=n242
+.gate xor2a  a=n242 b=n241 O=741
+.gate inv1   a=73 O=n244
+.gate nand3  a=n238 b=n236 c=n169 O=n245
+.gate xor2a  a=n245 b=n244 O=742
+.gate inv1   a=77 O=n247
+.gate nand3  a=n238 b=n236 c=n185 O=n248
+.gate xor2a  a=n248 b=n247 O=743
+.gate inv1   a=81 O=n250
+.gate nand4  a=n119 b=n109 c=n122 d=n88 O=n251
+.gate inv1   a=n251 O=n252
+.gate nand3  a=n252 b=n236 c=n141 O=n253
+.gate xor2a  a=n253 b=n250 O=744
+.gate inv1   a=85 O=n255
+.gate nand3  a=n252 b=n236 c=n203 O=n256
+.gate xor2a  a=n256 b=n255 O=745
+.gate inv1   a=89 O=n258
+.gate nand3  a=n252 b=n236 c=n169 O=n259
+.gate xor2a  a=n259 b=n258 O=746
+.gate inv1   a=93 O=n261
+.gate nand3  a=n252 b=n236 c=n185 O=n262
+.gate xor2a  a=n262 b=n261 O=747
+.gate inv1   a=97 O=n264
+.gate nand4  a=n117 b=n125 c=n99 d=n89 O=n265
+.gate inv1   a=n265 O=n266
+.gate nand3  a=n266 b=n236 c=n141 O=n267
+.gate xor2a  a=n267 b=n264 O=748
+.gate inv1   a=101 O=n269
+.gate nand3  a=n266 b=n236 c=n203 O=n270
+.gate xor2a  a=n270 b=n269 O=749
+.gate inv1   a=105 O=n272
+.gate nand3  a=n266 b=n236 c=n169 O=n273
+.gate xor2a  a=n273 b=n272 O=750
+.gate inv1   a=109 O=n275
+.gate nand3  a=n266 b=n236 c=n185 O=n276
+.gate xor2a  a=n276 b=n275 O=751
+.gate inv1   a=113 O=n278
+.gate nand4  a=n117 b=n109 c=n122 d=n89 O=n279
+.gate inv1   a=n279 O=n280
+.gate nand3  a=n280 b=n236 c=n141 O=n281
+.gate xor2a  a=n281 b=n278 O=752
+.gate inv1   a=117 O=n283
+.gate nand3  a=n280 b=n236 c=n203 O=n284
+.gate xor2a  a=n284 b=n283 O=753
+.gate inv1   a=121 O=n286
+.gate nand3  a=n280 b=n236 c=n169 O=n287
+.gate xor2a  a=n287 b=n286 O=754
+.gate inv1   a=125 O=n289
+.gate nand3  a=n280 b=n236 c=n185 O=n290
+.gate xor2a  a=n290 b=n289 O=755
+.end

@@ -1,0 +1,43 @@
+# edf2bench v0.8
+#   (!) 1997-2003 Giovanni Squillero <giovanni.squillero@polito.it>
+#
+# Edf source: "b02/b02.edf"
+# 1 input
+# 1 output
+# 4 D-type flipflops
+# 4 inverters
+# 24 gates (1 and, 14 nand, 3 or, 4 not)
+
+
+INPUT(LINEA)
+
+OUTPUT(U_REG)
+
+U_REG = DFF(U31)
+STATO_REG_2_ = DFF(U33)
+STATO_REG_1_ = DFF(U38)
+STATO_REG_0_ = DFF(U32)
+
+U31 = AND(U35, U37, STATO_REG_2_)
+U32 = NAND(U48, U47)
+U33 = NAND(U42, U41)
+U34 = NOT(STATO_REG_2_)
+U35 = NOT(STATO_REG_0_)
+U36 = NOT(LINEA)
+U37 = NOT(STATO_REG_1_)
+U38 = NAND(U52, U51)
+U39 = NAND(U50, U49, U35)
+U40 = OR(STATO_REG_2_, LINEA)
+U41 = NAND(STATO_REG_0_, U40)
+U42 = NAND(STATO_REG_1_, U39)
+U43 = OR(LINEA, STATO_REG_1_)
+U44 = NAND(U34, U43)
+U45 = NAND(LINEA, U34)
+U46 = NAND(STATO_REG_0_, U45)
+U47 = OR(LINEA, STATO_REG_0_, STATO_REG_2_)
+U48 = NAND(U46, U37)
+U49 = NAND(LINEA, U34)
+U50 = NAND(STATO_REG_2_, U36)
+U51 = NAND(STATO_REG_0_, U44)
+U52 = NAND(STATO_REG_1_, U34, U35)
+

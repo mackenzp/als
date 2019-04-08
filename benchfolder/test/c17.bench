@@ -1,0 +1,10 @@
+
+# simple AND gate for testing
+
+
+INPUT(1)
+INPUT(2)
+
+OUTPUT(3)
+
+3 = NAND(1, 2)

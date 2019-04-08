@@ -1,0 +1,33 @@
+
+Mackenzie Peterson
+
+als_dnn.py should be the name of the main driver file
+  - later we can use flags to choose dnn or q-learning
+
+Networks Directory
+  - container for all the circuits for which training needs to be done
+  - can be a big bin in the picture that has a bold line for circuits
+  + the networks.txt file tells "ML_mulitifile_v2" what circuit training needs to be done
+
+!! run in the abc/ directory
+
+Run the als_dnn file for training! This is a big loop (this goes for all files in networks.txt){
+  - pic grabbing from network.txt file
+  - opens file (abc_commands) for commands while calling /abc
+  - calls ./abc with those flags in the file (abc_commands)
+  - opens a file holding the nodes (nodes.txt) 
+!! look at nodes.txt and see what that is
+  - goes into DNN picture with all of the nodes
+  - do training 
+  - calculate the error for that choice using boolean calculus
+  - update nodes
+}
+
+!! We should have a testing directory and some flag that indicates if the DNN has been trained yet.
+
+Implementation after the DNN has been trained
+
+  - Open the DNN with nodes
+  - Update the nodes with the bias nodes
+    + based on training results
+  - run the circuit through the DNN, give results and final error.

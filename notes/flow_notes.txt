@@ -1,0 +1,24 @@
+
+
+
+call abc with -f run.txt
+    - run.txt
+        read lib
+        read bench or blif
+        map
+        show -g
+       
+
+
+
+dict = {"nand2":"1110", "nor2":"1000"}
+
+
+
+
+
+double getIntrinsic(string gate1, string gate2)
+
+    
+        
+    

@@ -1,0 +1,350 @@
+QALS Notes:
+
+  Bench files
+    - take a look at the format.
+      - why are they this way.
+    *c17.bench
+      - 5 inputs, 2 outputs, 6 gates
+      - declare input as INPUT(<insert number here>) // ie INPUT(3)
+      - delcare output as OUTPUT(<insert number here>) // ie OUTPUT(22)
+      - delcare internal nodes as numbers
+        - for example
+            10 = NAND(1, 3)
+        - looks like gates are labeled similar to design compiler // probably standard for libraries
+        - no size specified // just logic
+    *c432.bench
+      - same format, just a lot larger
+    Q: ** how are the .bench files created? // what is their originl
+      ->these are standard benchmarks // standard benchmarks
+
+
+  ML_multifile_v2.py
+    - imports from subprocess, random, and os
+    - opens the network.txt file and reads the lines into variable networks
+    - starts parsing through the first file
+    - opens file "dummy" for write access
+    - stores temp as list of the library, the file location, and the map instructions
+    - iterates
+      - just writes the temp list to dummy
+      - closes the file
+    - calls ./abc -f dummy // using call['./abc', '-f', 'dummy']
+      - calls the abc executable with -f and dummy arguments // -f means file // dummy contains the commands that abc will execute
+      - temp is just storing a list of commands that will be executed by ./abc
+    - opens nodes.txt and splits the lines into variable nodes
+    - set max_bit_error to 32
+    - set perm_error to 0.05 
+    Q: ** what is the perm_error in this case?
+      - also how does max_bit_error apply to us?
+      - mhd 5 physical cuts (k is set to 5 in default 2^5)
+
+    - set exact to 1 // exact=0 means mapping will be done using only approximate gates // exact=1 means mapping will be done using approx and exact gates
+    - set Q = list() // empty list
+    - iterates over the nodes variable stored earlier from nodes.txt
+      - appends none for max_bit_error + 1 // so the list is 33 long and full of "None"
+    - set the Q list according to maximum permisible bit Error for nodes in this network
+    - create list of permissible path between nodes
+      - print this out to see what is happening in the code
+    - generate the required configuration file for the error calculation
+      - use the call method 
+      - python3 graph.py with the filename // filename in this case is from networks[0] // from the networks.txt file
+      ** take a look at graph.py and see what is happening.
+    - iterates from 0 to 2000(episodes variable)
+      - random_path = empty list
+      - for i in range(len(permissible_path)) // permissible path was generated just before this // list of permissible paths between nodes
+        - appends (randint(min(permissible_path[i]), max(permissible_path[i]))) to random_paths list
+      - prints the random path
+      Q: ** what is going on here in more detail?
+
+      - write the random path to a file called generated result
+
+      - using the chosen bit errors, create another "dummy" file and throw in a bunch of commands
+      - then call the dummy file with ./abc and -f
+
+      - look for error in mapping located in the dummy.dump file
+
+      - update the Q list according to the achieved results
+      - (-10) if there is an error in mapping
+      - (+10) if the mapping is sucessful
+      - (-3) if the mapping is sucessful but the area is more than the previous one
+      - (+3) if the mapping is sucessful and the area is less than the previous one
+      - (+10) if error is less than the permissible error
+      - (-10) if error is more than the permissible error
+
+      - trains policy function
+        - user regressiont o implement the policy function
+          - there are states and actions
+          - need ot decide which action to take to maximize the total reward
+          - take action 1 or 2 ...
+          - approximate the policy function using DNN
+          - 
+
+      - there a big for loop that iterates over the Qmatrix and modifies each location value
+
+    - does the same thing over in a for loop until the end of the networks.txt file
+
+
+
+  nonlinear_regression_package.py
+    - had to install pandas and sklearn packages for python 
+    - looks like most of the top files are python 
+
+    - import pandas, matplotlib.pyplot, sys, numpy, sklearn.metrics (mean squared error), sklearn.model_selection (train_test_split), math (sqrt)
+    - open the text file final_result.txt and readlines into variable y
+    - set y = list(map(int, y))
+    - set x equal to new list
+    - append 1 -> len(y) into x
+    - set coefficients variable equal to polyfit(x,y,10)
+    - write the coefficients to a file (reg_coeff.txt)
+
+
+  ML_Tester_v2.py
+    - look again for C++ files
+    - make a list of the files that it either writes to or reads from
+
+    - imports subprocess, random, numpy, os, sys packages
+    
+    - set filename to the first argument when running script
+    - temp is filename.split('.')
+    - filetype is temp[1] 
+
+    - opens file "dummy" for write
+    - depending on the filetype, it will issue different writes for ./abc to interpret later
+      - filetype options (.bench, .v, .blif)
+    - calls ./abc with -f and the command container file "dummy"
+
+    - opens nodes.txt
+    - readlines into list variable nodes
+
+    - creates x_test
+      - list x_test is simply counting up 1->len(nodes)
+
+    - opens reg_coeff.txt
+    - readlines into list variable coefficiencts
+
+    - coefficicients = list(map(float, coefficients))
+    - variable "polynomial" = poly1d(coefficients) // generates the maximum hamming distance
+    - variable "y_pred" = polynomial(x_test)
+
+    - write the coefficients to a file called "generated_result.txt"
+      - rounds the y_pred items
+
+    - opens file "dummy" for write again
+    - depending on filetype, buffers commands for ./abc to execute
+    - calls ./abc -f dummy // calls the ./abc executable with the buffered commands in dummy file
+
+    - further, if the filetype is .bench
+      - calls python3 graph.py with the filename
+      - calls ./error executable
+      - opens final_error.txt and writes in the error
+    - else, ends the script
+
+
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Notes (for specified files in README): 
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  error.cpp
+    implements
+      *struct node
+        + Variables
+          - int name
+          - string type
+          - int output_num
+          - double gate_error
+          - double output_error
+          - double prob_1s
+
+      *class graph
+        + Variables
+          - Node* nodes
+          - int V // number of vertices
+          - list<int>* adj // pointer to an array containing adjacency
+        + Methods
+          - addEdge(int v, int w) // adds edge to graph
+          - void BFS(int s) // prints traversal from a given source s
+            - ** look at this more BFS
+          - void printGraph
+            - for all vertices
+              - for all node details
+                - print
+          - void setProb1s() // for all verticies set the probability of a 1
+          - void readGateError()
+            - reads in file "gate_error.txt"
+            - sets each node variable "gate_error" to the repective error in input file
+          - void calculateError()
+            - for all vertices
+              - ** look at 
+          - double getOutputError(int ) //
+            - for all vertices
+              - return output_error of each node
+          - double getProb1s(int) // 
+            - for all vertices
+              - return prob_1s of each node
+          - void printFinalError() // 
+            - output the final error to file "final_error.txt"
+
+      *main()
+        - open file "type.txt"
+        - create graph g with "num" vertices
+        - g.editNodes()
+        - g.addAlledges()
+        - g.readGateError()
+        - g.setProb1s()
+        - g.calculateError()
+        - g.printFinalError()
+        - close the file
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+  graph.py
+    -
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+  nonlinear_regression_package.py
+    - done earlier in notes
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+  ML_multifile_v2.py
+    - done earlier in notes
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+  ML_Tester_v2.py
+    - done earlier in notes
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Other Files mentioned ~~~~~~~~~~~~~~~~~~~~~~~~~  
+  
+  dummy
+    - temporary file used as a buffer for calling ./abc commands
+      - ie) call["./abc", -f, dummy]
+        - where dummy contains read_library, read_verilog commands etc
+
+  dummy.dump
+    - ** double check
+      - dumps the result of ./abc console output
+  
+  final_error.txt
+    - 
+
+  final_result.txt
+    - 
+
+  gate_error.txt
+    -
+
+  generated_result.txt
+    - 
+
+  nodes.txt
+    -
+
+  reg_coeff.txt
+    -
+
+  type.txt
+    -
+
+  type_nodes.txt
+    -
+
+  
+
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+ABC FILES
+
+**Notes on Abc Refactoring and mapping:
+
+  Refactoring
+
+  Abc_NtkRefactor(Abc_Ntk_t * pNtK, int n NodeSizeMax, int nConeSizeMax, int fUpdateLevel, int fUseZeros, int fUseDcs, int fVerbose){
+    - calls extern void Dec_GraphUpdateNetwork...
+    - initializes pointer 
+      - (of type)
+      - ProgressBar
+      - Abc_ManRef_t
+      - Abc_ManCut_t
+      - Dec_Graph_t
+      - Vec_Ptr_t
+      - Abc_Obj_t
+      - abctime clk and clock start variable set to Abc_clock()
+      int i and nNodes
+
+    - runs Aig Cleanup method
+    - starts managers // what are managers?
+    - computes reverse levels if fUpdateLevel is set
+      - calls Abc_NtkStartReverseLevels(pNtk, 0)
+    - resynthesize each node once
+      - pManRef->nNodesBeg = Abc_NtkNodeNum(pNtk)
+      - nNodes = Abc_NtkObjNumMax(pNtk)
+      - pProgress (type ProgressBar)
+      - calls Abc_NtkForEachNode(pNtk, pNode, i)
+        - gives progress bar
+        - if node is persistant then continue
+        - skip nodes with many fanouts (here greater than 1000)
+        - stop if all nodes have been tried once
+        - set clk to Abc_Clock()
+        - vFanins = Abc_NodeFindCut(pManCut, pNode, fUseDcs)
+        - PmanRef->timeCute += Abc_clk-clk
+        - pFForm = Abc_NodeRefactor() ** find Abc_NodeRefactor()
+        - updates graph with acceptable replacement
+
+    - print stats
+    - delete the managers
+    - put nodes in DFS order and reassign Ids
+    - chech AIG fanin order
+    - fix levels
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+  Mapping
+
+  Abc_NtkMap(Abc_Ntk_t* pNtk, double DelayTarget, double AreaMulti, double DelayMulti, float logicFan, float Slew, float Gain, int nGatesMin, int fRecovery, int fSwitching, int fUseProfile, int fVerbose, int *bitErrors)
+    - derive library from SCL
+    - penalize large gates by increasing their area
+    - derive supergate library
+    - compute switching activity
+    - perform mapping
+    - reconstruct the network after mapping
+
+  Map_Mapping (Map_Man_t * p, int* bitErrors) // this was modified by previous project to include bitErrors
+    - premappping calculations
+    - copute the cuts of nodes in the DFS order
+    - derive the truth tables
+    - if(bitErrors = Null){
+        Map_CalculateNumberOfNodes(p);
+        return 2;
+      }
+    - Map_MappingTruths(p, bitErrors); ** find where this is
+    - compute the minimum-delay mapping
+    - 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
