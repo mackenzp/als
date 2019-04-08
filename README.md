@@ -1,5 +1,8 @@
 # ALS: Approximate Logic Synthesis
 
+An Approximate Logic Synthesis Tool combining mapping techniques (from Berkeley's ABC synthesis tool) and a
+Deep Neural Network trained to predict the logic network output error with an incremental logic approximation.
+
 Type './als' to run the als executable
 
 ## Compiling:
