@@ -81,7 +81,7 @@ A few of the implemented methods are listed and act as support for the ALS frame
 - getCritPath()
     + Gets the critical path and returns a list of nodes that contribute to the critical path.
 - approxSynth()
-    + Optimizes the network for delay while maintaining error lower than the user constraint.
+    + Optimizes the network for delay (and area when permissible) while maintaining output error lower than the user constraint.
 
 
 ### synthesisDriver.py
