@@ -1,6 +1,0 @@
-read_library mcnc.genlib
-read benchfolder/ISCAS85/c1196.bench
-map
-write_blif original.blif
-show -g
-
