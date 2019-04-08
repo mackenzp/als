@@ -1,4 +1,4 @@
-# Benchmark "benchfolder/ISCAS85/c1196" written by ABC on Sun Apr  7 19:40:04 2019
+# Benchmark "benchfolder/ISCAS85/c1196" written by ABC on Sun Apr  7 20:16:10 2019
 .model benchfolder/ISCAS85/c1196
 .inputs G0 G1 G2 G3 G4 G5 G6 G7 G8 G9 G10 G11 G12 G13 G29 G30 G31 G32 G33 \
  G34 G35 G36 G37 G38 G39 G40 G41 G42 G43 G44 G45 G46

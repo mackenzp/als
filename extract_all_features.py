@@ -1,14 +1,21 @@
 import os
+import datetime
 
 # Author:   Mackenzie Peterson
 # Contact:  mackenzp@usc.edu
 # Purpose: This file will act as the control and setup flow for error_control.py for all benchfiles
 # Note: This is the top level wrapper for generating all training vectors for the DNN
+
+currentDT = datetime.datetime.now()
+time = str(currentDT.year) + "_" + str(currentDT.month) + "_" + str(currentDT.day) + "_" + \
+       str(currentDT.hour) + "_" + str(currentDT.minute) + "_" + str(currentDT.second)
+
 print("\n")
 command = "ls train_dnn.txt > /dev/null 2>&1"
 if(os.system(command) == 0):
-    print("NOTE: Moved train_dnn.txt to train_dnn.bak")
-    command = "mv train_dnn.txt train_dnn.bak"
+    name = "train_dnn_" + time + ".txt"
+    print("NOTE: Moved train_dnn.txt to ", name)
+    command = "mv train_dnn.txt " + name
     os.system(command)
 else:
     print("NOTE: There is no train_dnn.txt present. Will create one.")
