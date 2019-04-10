@@ -1,13 +1,13 @@
 # ALS: Approximate Logic Synthesis
 
 An Approximate Logic Synthesis Tool combining technology mapping techniques (from Berkeley's ABC synthesis tool) and a
-Deep Neural Network trained based on boolean difference calculus to predict the output error of the network with an incremental logic gate approximation.
+Deep Neural Network (trained based on boolean difference calculus) to predict the future output error of a network with an incremental logic gate approximation.
 
 Type './als' to run the als executable
 
 ## Compiling:
-ALS utilizes Berkeley's open-source synthesis tool "ABC" for initial exact technology mapping and feature extraction.
-ABC is compiled, but to re-compile ABC type 'make clean' and then 'make'.
+ALS utilizes Berkeley's open-source synthesis tool "ABC" as a base platform for initial exact technology mapping and feature extraction.
+The modified version of ABC is compiled, but to re-compile ABC type 'make clean' and then 'make'.
 
 <br>
 
@@ -81,7 +81,7 @@ A few of the implemented methods are listed and act as support for the ALS frame
 - getCritPath()
     + Gets the critical path and returns a list of nodes that contribute to the critical path.
 - approxSynth()
-    + Optimizes the network for delay while maintaining error lower than the user constraint.
+    + Optimizes the network for delay (and area when permissible) while maintaining output error lower than the user constraint.
 
 
 ### synthesisDriver.py
