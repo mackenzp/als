@@ -8,12 +8,11 @@
 
 
 import os
+import copy
 from synthesisLSA import synthesisLSA
 
 # ------------------------------------------------------------------------------------------
-class training():
-    def __init__(self):
-        temp = "test"
+
 
 # prints the welcome message when opened ---------------------------------------------------
 def printInit():
@@ -43,40 +42,93 @@ def writeRuntxt(command):
 
 # ------------------------------------------------------------------------------------------
 def runABC():
-    command = "./abc -f run.txt"
+    command = "./abc -f run.txt > abc.log"
     os.system(command)
+
+def checkABCError(filename):
+    lines = [line.rstrip("\n") for line in open("abc.log")]
+    for line in lines:
+        if ("Error" in line):
+            print("Error: Filename ",filename," not found", sep="")
+            print("\n")
+            return 1
+    return 0
+
+def is_float(s_in):
+    s = copy.deepcopy(s_in)
+    result = False
+    if s.count(".") == 1:
+        if s.replace(".", "").isdigit():
+            result = True
+    return result
 
 # prints the possible commands that can be run for the user --------------------------------
 def printHelp(): 
     print("\tSynthesize Command(s):")
-    print("\t map_approx <.bench file>")
-    print("\t map_exact <.bench file>")
+    print("\t map_approx    <file_path (.blif or .bench)>   <error constraint (0 - 1.0)>")
+    print("\t map_exact     <file_path (.blif or .bench)>")
     print("\n")
     print("\tWrite Command(s):")
-    print("\t write_blif <.blif file>")
+    print("\t write_blif    <filename (.blif)>")
     print("\n")
     print("\tTrain Command(s):")
     print("\t train_dnn")
 
 # utilizes the DNN to do approximate synthesis ----------------------------------------------
 def mapApprox(command):
+
     # ensure the argument is valid
     command_list = command.split(" ")
-    if(len(command_list)!=2):
-        print("ERROR: map_approx should have one argument\n")
+    if(len(command_list)!=3):
+        print("ERROR: map_approx should have two arguments")
+        print("\t map_approx    <file_path (.blif or .bench)>   <error constraint (0 - 1.0)>")
         return
     for item in command_list:
         if("map_approx" in item):
             command_list.remove(item)
     command = command_list[0]
-    if (".bench" not in command or len(command)<=6):
+
+    # checks that the user_error_constraint is of type float before continuing
+    if(is_float(command_list[1])):
+        user_error_constraint = float(command_list[1])
+    else:
+        print("ERROR: map_approx should have a valid error constraint between 0 and 1.0")
+        print("\t map_approx    <file_path (.blif or .bench)>   <error constraint (0 - 1.0)>")
+        return
+
+    if ((".bench" not in command and ".blif" not in command) or len(command)<=6):
         print("ERROR: invalid filetype for map_approx\n")
         return
     writeRuntxt(command)
     runABC()
 
-    network = synthesisLSA()
-    network.printStatus()
+    # extracts information about the nodes for approximate synthesis
+    extract_command = "python3 blif_to_custom_bench.py > original.bench"
+    os.system(extract_command)
+    extract_command = "python3 node_extract.py original.bench"
+    os.system(extract_command)
+
+    # checks that the filename is correct and that ABC was able to successfully map
+    if(not checkABCError(command)):
+
+        network = synthesisLSA(error_constraint=user_error_constraint)
+        network.loadLibraryStats()
+        network.loadNetwork()
+        network.printGates()
+        network.getCritPath()
+        network.printStatus()
+        network.printCritPath()
+        network.approxSynth()
+        network.calcOutputError()
+        network.calcArea(1)
+        network.getCritPath()
+        print("\n")
+        network.printCritPath()
+        network.printStatus()
+        network.writeNodeTypes()
+
+
+
 
 
 # map the exact network using abc -----------------------------------------------------------
@@ -104,7 +156,7 @@ def writeBlif(command):
     # ensure the argument is valid
     command_list = command.split(" ")
     if(len(command_list)!=2):
-        print("ERROR: write_bench should have one argument\n")
+        print("ERROR: write_blif should have one argument\n")
         return
     for item in command_list:
         if("write_blif" in item):
@@ -114,6 +166,8 @@ def writeBlif(command):
         print("ERROR: invalid filetype for write_blif\n")
         return
 
+    system_call = "python3 node_types_to_blif.py"
+    os.system(system_call)
     system_call = "python3 custom_bench_to_blif.py original.bench >" + command
     os.system(system_call)
     print("Successfully wrote mapped network to", command)

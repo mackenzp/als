@@ -34,6 +34,7 @@ class synthesisLSA(object):
         self.num_nodes = 0
         self.all_features = []
         self.all_nodes = []
+        self.all_vdd_gnd = []
         self.all_primary = []
         self.node_by_level = []
         self.gate_error = []
@@ -86,6 +87,12 @@ class synthesisLSA(object):
                 self.lib_dict[temp_name]['area'] = temp_area
                 self.lib_dict[temp_name]["input_load"] = temp_input_load
                 self.lib_dict[temp_name]["delay"] = temp_delay
+            elif("zero" in gate[1] or "one" in gate[1]):
+                temp_name = gate[1]
+                self.lib_dict[temp_name] = {}
+                self.lib_dict[temp_name]['area'] = 0
+                self.lib_dict[temp_name]["input_load"] = 0
+                self.lib_dict[temp_name]["delay"] = 0
 
         self.truthTable = {"inv1": "10", "inv2": "10", "inv3": "10", "inv4": "10", \
                            "nand2": "1110", "nand3": "11111110", "nand4": "1111111111111110", \
@@ -119,6 +126,7 @@ class synthesisLSA(object):
                 nodes_types.append(item)
             else:
                 primary_types.append(item)
+
 
         # append 0.0 for gate error
         for i in range(0, len(nodes_types)):
@@ -174,9 +182,19 @@ class synthesisLSA(object):
             for item in nodes_types:
                 if (item[2] == str(temp_count)):
                     temp_list.append(item)
+                elif (item[2] == "0" and item not in self.all_vdd_gnd):
+                    self.all_vdd_gnd.append(item)
             if(temp_list):
                 self.node_by_level.append(temp_list)
             temp_count = temp_count + 1
+
+        for item in self.all_vdd_gnd:
+            name = item[1]
+            item[1] = item[2]
+            item[2] = item[3]
+            item[3] = name
+            item.append([])
+
 
         # create dictionary of output names and the inputs
         temp_nodes_edges = [line.rstrip("\n") for line in open("node_edges.txt")]
@@ -221,18 +239,22 @@ class synthesisLSA(object):
         for level in self.node_by_level:
             for gate in level:
                 temp_all_nodes.append(gate)
+        for gate in self.all_vdd_gnd:
+            temp_all_nodes.append(gate)
         self.all_nodes = sorted(temp_all_nodes, key=itemgetter(2))
 
 
     # -- Calculate the Total Area of the network --------------------------------
     def calcArea(self, set):
         total_area = 0
-        for node in self.all_nodes:
-            if (node[0] in self.lib_dict):
-                total_area = total_area + float(self.lib_dict[node[0]]['area'])
+        for level in self.node_by_level:
+            for gate in level:
+                if (gate[0] in self.lib_dict):
+                    total_area = total_area + float(self.lib_dict[gate[0]]['area'])
         if(set != 0):
             self.current_area = total_area
         return total_area
+
 
     def printGates(self):
         self.calcArea(1)
@@ -400,15 +422,16 @@ class synthesisLSA(object):
 
         print("Running Synthesis...")
         continue_to_area_opt = 0
-        
+
+
         # Critical Path Optimization (begin) -------------------------------------------------------
         temp = []
         count = 0
         # break will end the loop
         while(1):
             # prints the loading bar
-            sys.stdout.write("\r" + "Num Replaced: " + str(count) + " | " + "Error: " + str(self.current_avg_error) + " | " \
-                             + "Delay: " + str(self.current_delay))
+            sys.stdout.write("\r" + "Trying: " + str(count) + " | " + "Error: " + str(self.current_avg_error) + " | " \
+                             + "Delay: " + str(self.current_delay) + "       ")
             # previous change // used for stopping condition
             last_temp = temp
             # cp is the list of the critical path
@@ -458,92 +481,42 @@ class synthesisLSA(object):
 
 
         # Area Optimization // if allowed (begin) -------------------------------------------------
-        # Only does area optimization if there is left over error contraint
-        # This happeins after minimizing the critical path
-        '''
+        # Only does area optimization if there is left over error constraint
+        # This happens after minimizing the critical path
+
+        count = 0
+        # iteration version
         if(continue_to_area_opt):
-            orig_gate = ""
-            fast_gate = ""
-            print("\nOptimizing area with left over error constraint...") 
-            for level in self.node_by_level:    
-                for gate in level:
+            print("\n\nOptimizing area with left over error constraint...")
+            cont_break = 0
+            for level in range(0, len(self.node_by_level)-1):    
+                for i in range(0,len(self.node_by_level[level])-1):
+                    gate = self.node_by_level[level][i]
                     if (gate[3] not in self.nodes_changed):
                         orig_gate = copy.deepcopy(gate[0])
                         faster_gate = self.fastestNode(orig_gate)
                         if (orig_gate != faster_gate):
-                            gate[0] == faster_name
+                            self.node_by_level[level][i][0] = faster_gate
                             self.nodes_changed.append(gate[3])
-                            self.gate_error[gate[2]] = self.getIntrinsic(name, faster_name)
+                            self.gate_error[gate[2]] = self.getIntrinsic(orig_gate, faster_gate)
                             self.calcOutputError()
                             count = count + 1
                             if (float(self.current_avg_error) > self.error_constraint):
-                               self.nodes_changed.remove(gate[3])
-                               gate[0] = orig_gate
-                               self.gate_error[gate[2]] = 0
-                               self.calcOutputError()
-                               break
-        '''
+                                self.nodes_changed.remove(gate[3])
+                                gate[0] = orig_gate
+                                self.node_by_level[level][i][0] = orig_gate
+                                self.gate_error[gate[2]] = 0
+                                self.calcOutputError()
+                                count = count - 1
+                                cont_break = 1
+                                break
+                    self.calcArea(1)
+                    sys.stdout.write("\r" + "Trying: " + str(count) + " | " \
+                                    + "Error: " + str(self.current_avg_error) + " | " \
+                                    + "Area: " + str(self.current_area) + "       ")
+                if (cont_break):
+                    break
 
 
-
-
-
-
-        # Area Optimization // if allowed (end) -------------------------------------------------
-
-
-
-
-
-
-
-
-
-
-        '''
-        ntk = []
-        for level in self.node_by_level:
-            Tk = self.Tk
-            while(Tk > self.Tf):
-                gate_num = random.randint(0, len(level)-1)
-                orig = copy.deepcopy(level[gate_num][0])
-                level[gate_num][0] = self.randReplacementGate(level[gate_num][0])
-                self.gate_error[level[gate_num][2]] = self.getIntrinsic(orig, level[gate_num][0])
-                self.calcOutputError()
-                if (float(self.current_avg_error) < self.error_constraint):
-                    area = self.calcArea(0)
-                    delay = self.calcDelay(0)
-                    if(delay < self.current_delay):
-                        print("found", delay)
-                        print("current", self.current_delay)
-                        ntk.append(copy.deepcopy(self.node_by_level))
-                        self.calcDelay(1)
-                    elif(area < self.current_area):
-                        self.calcArea(1)
-                        Tk = Tk*self.B
-                    else:
-                        level[gate_num][0] = orig
-                        self.gate_error[level[gate_num][2]] = 0.0
-                        Tk = Tk*self.B
-                else:
-                    level[gate_num][0] = orig
-                    self.gate_error[level[gate_num][2]] = 0.0
-                    Tk = Tk * self.B
-
-        fast = self.node_by_level
-        for item in ntk:
-            min = 1000000
-            self.node_by_level = copy.deepcopy(item)
-            delay = self.calcDelay(1)
-            print(delay)
-            if (delay < min):
-                fast = self.node_by_level
-        self.node_by_level = copy.deepcopy(fast)
-        self.levelToFlat()
-
-        print("Approximate Network: ")
-        for level in self.node_by_level:
-            print(level)
-        '''
 
 
