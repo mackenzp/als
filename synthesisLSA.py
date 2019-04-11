@@ -110,6 +110,29 @@ class synthesisLSA(object):
                           "oai21": "3", "oai22": "4", "BUF1": "1", \
                           "zero": "0", "one": "0"}
 
+    def reset(self):
+        # techlib specific features
+        self.lib_dict = {}
+
+        # network specific features
+        self.num_nodes = 0
+        self.all_features = []
+        self.all_nodes = []
+        self.all_vdd_gnd = []
+        self.all_primary = []
+        self.node_by_level = []
+        self.gate_error = []
+        self.network_lookup = {}
+        self.connections_dict = {}
+        self.curr_delay_dict = {}
+        self.curr_gate_dict = {}
+
+        self.nodes_changed = []
+        self.crit_output = ""
+        self.crit_path = []
+        self.truthTable = {}
+        self.numInputs = {}
+
     # -- load the exact mapped network -----------------------------------------
     def loadNetwork(self):
         # get the network from node_types.txt
@@ -254,6 +277,13 @@ class synthesisLSA(object):
         if(set != 0):
             self.current_area = total_area
         return total_area
+
+
+    def getAvgError(self):
+        return self.current_avg_error
+
+    def getMaxError(self):
+        return self.current_max_error
 
 
     def printGates(self):
@@ -420,7 +450,7 @@ class synthesisLSA(object):
 
     def approxSynth(self):
 
-        print("Running Synthesis...")
+        print("Optmizing Delay...")
         continue_to_area_opt = 0
 
 
@@ -430,8 +460,7 @@ class synthesisLSA(object):
         # break will end the loop
         while(1):
             # prints the loading bar
-            sys.stdout.write("\r" + "Trying: " + str(count) + " | " + "Error: " + str(self.current_avg_error) + " | " \
-                             + "Delay: " + str(self.current_delay) + "       ")
+            sys.stdout.write("\r" + "Trying: " + str(count) + " | " + "Error: " + str(self.current_avg_error) + "     ")
             # previous change // used for stopping condition
             last_temp = temp
             # cp is the list of the critical path
@@ -512,8 +541,7 @@ class synthesisLSA(object):
                                 break
                     self.calcArea(1)
                     sys.stdout.write("\r" + "Trying: " + str(count) + " | " \
-                                    + "Error: " + str(self.current_avg_error) + " | " \
-                                    + "Area: " + str(self.current_area) + "       ")
+                                    + "Error: " + str(self.current_avg_error) + "      ")
                 if (cont_break):
                     break
 

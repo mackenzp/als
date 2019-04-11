@@ -14,10 +14,8 @@ from synthesisLSA import synthesisLSA
 # adds tab autocomplete capability ---------------------------------------------------------
 try:
 	import readline
-	#from completer import Completer
 	readline.set_completer_delims(' \t\n;')
 	readline.parse_and_bind("tab: complete")
-
 except ImportError:
 	print("Note: Unable to import packages for tab autocomplete. This may happen with OS X\n")
 
@@ -84,6 +82,27 @@ def printHelp():
     print("\tTrain Command(s):")
     print("\t train_dnn")
 
+def writeBlif(command):
+    # ensure the argument is valid
+    command_list = command.split(" ")
+    if(len(command_list)!=2):
+        print("ERROR: write_blif should have one argument\n")
+        return
+    for item in command_list:
+        if("write_blif" in item):
+            command_list.remove(item)
+    command = command_list[0]
+    if (".blif" not in command or len(command)<=6):
+        print("ERROR: invalid filetype for write_blif\n")
+        return
+
+    system_call = "python3 node_types_to_blif.py"
+    os.system(system_call)
+    system_call = "python3 custom_bench_to_blif.py original.bench >" + command
+    os.system(system_call)
+    print("Successfully wrote mapped network to", command)
+    print("\n")
+
 # utilizes the DNN to do approximate synthesis ----------------------------------------------
 def mapApprox(command):
 
@@ -121,24 +140,53 @@ def mapApprox(command):
     # checks that the filename is correct and that ABC was able to successfully map
     if(not checkABCError(command)):
 
+        print("\nExact Network:")
         network = synthesisLSA(error_constraint=user_error_constraint)
         network.loadLibraryStats()
         network.loadNetwork()
         network.printGates()
         network.getCritPath()
-        network.printStatus()
         network.printCritPath()
+        init_delay = network.calcDelay(1)
+        init_area = network.calcArea(1)
         network.approxSynth()
         network.calcOutputError()
         network.calcArea(1)
         network.getCritPath()
-        print("\n")
-        network.printCritPath()
-        network.printStatus()
         network.writeNodeTypes()
 
+        system_call = "python3 node_types_to_blif.py"
+        os.system(system_call)
+        system_call = "python3 custom_bench_to_blif.py original.bench > temp.blif"
+        os.system(system_call)
+        writeRuntxt("temp.blif")
+        runABC()
+        extract_command = "python3 blif_to_custom_bench.py > original.bench"
+        os.system(extract_command)
+        extract_command = "python3 node_extract.py original.bench"
+        os.system(extract_command)
+        os.system("rm temp.blif")
 
+        print("\n\nApproximated Network:")
+        network.reset()
+        network.loadLibraryStats()
+        network.loadNetwork()
+        network.printGates()
+        network.getCritPath()
+        network.printCritPath()
+        final_delay = network.calcDelay(1)
+        final_area = network.calcArea(1)
 
+        print("\nResults:")
+        print("----------------------------------")
+        print("Initial Critical Delay: | ", init_delay)
+        print("Initial Area:           | ", init_area)
+        print("----------------------------------")
+        print("Final Critical Delay:   | ", final_delay)
+        print("Final Area:             | ", final_area)
+        print("----------------------------------")
+        print("Final Average Error:    | ", network.getAvgError())
+        print("\n")
 
 
 # map the exact network using abc -----------------------------------------------------------
@@ -162,26 +210,6 @@ def mapExact(command):
     print("\nNetwork has been mapped with:\nAverage error:\t0%\nMax error:\t0%\n")
 
 
-def writeBlif(command):
-    # ensure the argument is valid
-    command_list = command.split(" ")
-    if(len(command_list)!=2):
-        print("ERROR: write_blif should have one argument\n")
-        return
-    for item in command_list:
-        if("write_blif" in item):
-            command_list.remove(item)
-    command = command_list[0]
-    if (".blif" not in command or len(command)<=6):
-        print("ERROR: invalid filetype for write_blif\n")
-        return
-
-    system_call = "python3 node_types_to_blif.py"
-    os.system(system_call)
-    system_call = "python3 custom_bench_to_blif.py original.bench >" + command
-    os.system(system_call)
-    print("Successfully wrote mapped network to", command)
-    print("\n")
 
 # executes the training flow for the DNN -- later should specify the directory of bench files-
 def trainDNN():
