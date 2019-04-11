@@ -45,7 +45,7 @@ def writeRuntxt(command):
     file.write("\n")
     file.write("write_blif original.blif")
     file.write("\n")
-    file.write("show -g")
+    file.write("show")
     file.close()
 
 # ------------------------------------------------------------------------------------------
