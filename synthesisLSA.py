@@ -402,13 +402,15 @@ class synthesisLSA(object):
 
 
     # gets the error from the dnn
+    # every n times runs self.dnnCheckError() and checks how off it is
     def dnnGetError():
         pass
 
 
-    # periodically check delta error between actual and dnn predicted
-    def dnnPredictError():
-        # call dnnPredictError()
+    # gets the current error, then runs self.calcOutputError()
+    # returns how off the error is
+    def dnnCheckError():
+        # call self.calcOutputError()
         pass
 
 
