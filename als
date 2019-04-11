@@ -11,6 +11,16 @@ import os
 import copy
 from synthesisLSA import synthesisLSA
 
+# adds tab autocomplete capability ---------------------------------------------------------
+try:
+	import readline
+	from completer import Completer
+	comp = Completer()
+	readline.set_completer_delims(' \t\n;')
+	readline.parse_and_bind("tab: complete")
+except ImportError:
+	print("Note: Unable to import packages for tab autocomplete. This may happen with OS X\n")
+
 # ------------------------------------------------------------------------------------------
 
 
