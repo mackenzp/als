@@ -177,6 +177,9 @@ def mapApprox(command):
         final_delay = network.calcDelay(1)
         final_area = network.calcArea(1)
 
+
+        # see if a loading bar would look okay for savings on delay and area.
+
         print("\nResults:")
         print("----------------------------------")
         print("Initial Critical Delay: | ", init_delay)

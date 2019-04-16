@@ -43,6 +43,14 @@ class synthesisLSA(object):
         self.curr_delay_dict = {}
         self.curr_gate_dict = {}
 
+        # insert a gate_features dictionary / key = node name / value = list[all features of the node]
+        self.gate_features = {}
+        # utilize the connections_dict dictionary for the key = node name / value = list[outputs of node]
+        # consider output_connections and input_connections dictionaries for easier traversal during feature generation
+        self.output_connections = {}
+        self.input_connections = {}
+
+
         self.nodes_changed = []
         self.crit_output = ""
         self.crit_path = []
@@ -132,6 +140,8 @@ class synthesisLSA(object):
         self.crit_path = []
         self.truthTable = {}
         self.numInputs = {}
+
+
 
     # -- load the exact mapped network -----------------------------------------
     def loadNetwork(self):
@@ -238,6 +248,14 @@ class synthesisLSA(object):
                 self.connections_dict[item[0]].append(item[1])
                 self.curr_delay_dict[item[0]] = 0
 
+            if (item[0] not in self.output_connections):
+                self.output_connections[item[0]] = []
+                for other in node_edges:
+                    if (item[0] == other[1]):
+                        self.output_connections[item[0]].append(other[0])
+
+
+
         # move the output name of the node to the back
         for level in self.node_by_level:
             for node in level:
@@ -255,6 +273,127 @@ class synthesisLSA(object):
                 self.network_lookup[name] = index
 
         self.levelToFlat()
+        self.loadFeatures()
+
+    # initializes every node's features for feature injection into the DNN during error prediction
+    def loadFeatures(self):
+        # initialize input connections for each node
+        for gate in self.all_nodes:
+            self.input_connections[gate[3]] = gate[4]
+        features = [line.rstrip("\n") for line in open("train_data.txt")]
+        gate_count = 0
+        for item in features:
+            feat_list = item.split(" ")
+            splice_list = feat_list[0:6]
+            self.gate_features[self.all_nodes[gate_count][3]] = splice_list
+            gate_count = gate_count + 1
+
+
+    def gateNumLookup(self, name):
+        if (name == "inv1"):
+            return 0
+        elif (name == "inv2"):
+            return 1
+        elif (name == "inv3"):
+            return 2
+        elif (name == "inv4"):
+            return 3
+        elif (name == "nand2"):
+            return 4
+        elif (name == "nand3"):
+            return 5
+        elif (name == "nand4"):
+            return 6
+        elif (name == "nor2"):
+            return 7
+        elif (name == "nor3"):
+            return 8
+        elif (name == "nor4"):
+            return 9
+        elif (name == "and2"):
+            return 10
+        elif (name == "or2"):
+            return 11
+        elif (name == "xor2a"):
+            return 12
+        elif (name == "xor2b"):
+            return 13
+        elif (name == "xnor2a"):
+            return 14
+        elif (name == "xnor2b"):
+            return 15
+        elif (name == "aoi21"):
+            return 16
+        elif (name == "aoi22"):
+            return 17
+        elif (name == "oai21"):
+            return 18
+        elif (name == "oai22"):
+            return 19
+        elif (name == "BUF1"):
+            return 20
+        elif (name == "DFF"):
+            return 21
+        elif (name == "zero"):
+            return 22
+        elif (name == "one"):
+            return 23
+        else:
+            print("Error: There has been a problem with gate naming internally.")
+            exit(1)
+
+    def updateFeature(self, node, replacement):
+        if (len(node) <= 2):
+            self.gate_features[self.node_by_level[node[0]][node[1]][3]][3] = self.gateNumLookup(replacement)
+        else:
+            self.gate_features[node[3]][3] = self.gateNumLookup(replacement)
+
+    def genFeature(self, node, replacement):
+        # replicate the feature generation of the training model based on the current network
+        # direct node features
+        feature = []
+        for feat in self.gate_features[node[3]]:
+            feature.append(feat)
+        # node fanin features
+        count = 0
+        for in_gate in self.input_connections[node[3]]:
+            if(count < 4):
+                if (in_gate in self.gate_features):
+                    for feat in self.gate_features[in_gate]:
+                        feature.append(feat)
+                else:
+                    for i in range(0, 6):
+                        feature.append("0")
+                count = count + 1
+        while(count < 4):
+            for i in range(0, 6):
+                feature.append("0")
+            count = count + 1
+        # node fanout features
+        count = 0
+        for out_gate in self.output_connections[node[3]]:
+            if(count < 10):
+                if (out_gate in self.gate_features):
+                    for feat in self.gate_features[out_gate]:
+                        feature.append(feat)
+                else:
+                    for i in range(0,6):
+                        feature.append("0")
+                count = count + 1
+        while (count < 10):
+            for i in range(0, 6):
+                feature.append("0")
+            count = count + 1
+        # append on local error, current_max_error, current_avg_error
+        feature.append(self.getIntrinsic(node[0], replacement))
+        feature.append(self.current_max_error)
+        feature.append(self.current_avg_error)
+        print(feature)
+        # normalize the feature
+
+
+
+
 
     # converts the network stored by level and converts to a flattened list of all nodes
     def levelToFlat(self):
@@ -403,15 +542,15 @@ class synthesisLSA(object):
 
     # gets the error from the dnn
     # every n times runs self.dnnCheckError() and checks how off it is
-    def dnnGetError():
-        pass
-
+    def dnnGetError(self, node, replacement):
+        self.genFeature(node, replacement)
+        self.calcOutputError()
 
     # gets the current error, then runs self.calcOutputError()
     # returns how off the error is
-    def dnnCheckError():
+    def dnnCheckError(self, node, replacement):
         # call self.calcOutputError()
-        pass
+        self.dnnGetError(node, replacement)
 
 
     # -- Returns the absolute error of the current network
@@ -450,11 +589,16 @@ class synthesisLSA(object):
         else:
             print("This library only has 4 inputs")
 
+    def getNode(self, node):
+        if (len(node) <= 2):
+            return self.node_by_level[node[0]][node[1]]
+        else:
+            return node
+
     def approxSynth(self):
 
         print("Optmizing Delay...")
         continue_to_area_opt = 0
-
 
         # Critical Path Optimization (begin) -------------------------------------------------------
         temp = []
@@ -478,35 +622,45 @@ class synthesisLSA(object):
             # get the index of the gate in the network // temp is a list
             temp = self.network_lookup[firstgate[0]]
             # make a copy of the gate in case the error constraint is violated
-            orig_gate = copy.deepcopy(self.node_by_level[temp[0]][temp[1]][0])
+            orig_gate = copy.deepcopy(self.node_by_level[temp[0]][temp[1]])
             # replace the gate in the network with the fastest gate
-            fast_gate = self.fastestNode(orig_gate)
-            self.node_by_level[temp[0]][temp[1]][0] = fast_gate
-            # if the gate has not been changed
-            if(firstgate[0] not in self.nodes_changed):
-                # note the gate has been changed
-                self.nodes_changed.append(firstgate[0])
-                index = self.node_by_level[temp[0]][temp[1]][2]
-                # add the error of the replacement to the gate_error list // later printed to calc error
-                self.gate_error[index] = self.getIntrinsic(fast_gate, orig_gate)
-                self.calcOutputError()
-                count = count + 1
-                # if error contraint violated, replace the node with the original and set local error to 0
-                if (float(self.current_avg_error) > self.error_constraint):
-                    self.nodes_changed.remove(firstgate[0])
+            fast_gate = self.fastestNode(orig_gate[0])
+
+
+            if (fast_gate != orig_gate[0]):
+
+                self.node_by_level[temp[0]][temp[1]][0] = fast_gate
+                # if the gate has not been changed
+                if(firstgate[0] not in self.nodes_changed):
+                    # note the gate has been changed
+                    self.nodes_changed.append(firstgate[0])
+                    index = self.node_by_level[temp[0]][temp[1]][2]
+                    # add the error of the replacement to the gate_error list // later printed to calc error
+                    self.gate_error[index] = self.getIntrinsic(fast_gate, orig_gate[0])
+                    self.updateFeature(temp, fast_gate)
+                    #self.calcOutputError()
+                    self.dnnCheckError(self.getNode(orig_gate), fast_gate)
+                    count = count + 1
+                    # if error contraint violated, replace the node with the original and set local error to 0
+                    if (float(self.current_avg_error) > self.error_constraint):
+                        self.nodes_changed.remove(firstgate[0])
+                        self.node_by_level[temp[0]][temp[1]][0] = orig_gate[0]
+                        self.gate_error[index] = 0
+                        self.updateFeature(temp, orig_gate[0])
+                        self.calcOutputError()
+                        break
+                # if the node has been changed, change the node back to the original gate
+                else:
                     self.node_by_level[temp[0]][temp[1]][0] = orig_gate
-                    self.gate_error[index] = 0
-                    self.calcOutputError()
-                    break
-            # if the node has been changed, change the node back to the original gate
             else:
-                self.node_by_level[temp[0]][temp[1]][0] = orig_gate
-            
+                self.nodes_changed.append(firstgate[0])
             # stopping condition // if there is no option for further replacement to make the critical path better
             if (last_temp == temp):
                 self.calcOutputError()
                 continue_to_area_opt = 1
                 break
+
+
 
         # Critical Path Optimization (end) --------------------------------------------------------
 
@@ -524,19 +678,22 @@ class synthesisLSA(object):
                 for i in range(0,len(self.node_by_level[level])-1):
                     gate = self.node_by_level[level][i]
                     if (gate[3] not in self.nodes_changed):
-                        orig_gate = copy.deepcopy(gate[0])
-                        faster_gate = self.fastestNode(orig_gate)
-                        if (orig_gate != faster_gate):
+                        orig_gate = copy.deepcopy(gate)
+                        faster_gate = self.fastestNode(orig_gate[0])
+                        if (orig_gate[0] != faster_gate):
                             self.node_by_level[level][i][0] = faster_gate
                             self.nodes_changed.append(gate[3])
-                            self.gate_error[gate[2]] = self.getIntrinsic(orig_gate, faster_gate)
-                            self.calcOutputError()
+                            self.gate_error[gate[2]] = self.getIntrinsic(orig_gate[0], faster_gate)
+                            self.updateFeature(gate, faster_gate)
+                            # self.calcOutputError()
+                            self.dnnCheckError(self.getNode(orig_gate), faster_gate)
                             count = count + 1
                             if (float(self.current_avg_error) > self.error_constraint):
                                 self.nodes_changed.remove(gate[3])
-                                gate[0] = orig_gate
-                                self.node_by_level[level][i][0] = orig_gate
+                                gate[0] = orig_gate[0]
+                                self.node_by_level[level][i][0] = orig_gate[0]
                                 self.gate_error[gate[2]] = 0
+                                self.updateFeature(gate, orig_gate[0])
                                 self.calcOutputError()
                                 count = count - 1
                                 cont_break = 1
