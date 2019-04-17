@@ -51,12 +51,24 @@ for itr in range (flen):
     loadingBar(loadbar_count, loadbar_total, 3)
     loadbar_count = loadbar_count + 1
 
+
+file = open("td_normalization_values.txt", "w")
+
 for fetr in range (num_features):
+    min = np.min(xdata[:,fetr])
+    max = np.max(xdata[:,fetr])
+    file.write(str(min))
+    file.write(" ")
+    file.write(str(max))
+    file.write("\n")
     for itr in range (flen):
-        xdata[itr][fetr] = (xdata[itr,fetr] - np.min(xdata[:,fetr])) / (np.max(xdata[:,fetr]) - np.min(xdata[:,fetr])) 
+        xdata[itr][fetr] = (xdata[itr,fetr] - min) / max - min) 
+        
         loadingBar(loadbar_count, loadbar_total, 3)
         loadbar_count = loadbar_count + 1
-            
+           
+file.close()
+
 for itr in range (flen):
     if (ydata[itr][1] <= 0.5 ):
         ydata[itr][1] = np.ceil(40 * ydata[itr,1]/0.5)

@@ -135,6 +135,7 @@ class synthesisLSA(object):
         self.curr_delay_dict = {}
         self.curr_gate_dict = {}
 
+        self.normalize_list = []
         self.nodes_changed = []
         self.crit_output = ""
         self.crit_path = []
@@ -288,6 +289,18 @@ class synthesisLSA(object):
             self.gate_features[self.all_nodes[gate_count][3]] = splice_list
             gate_count = gate_count + 1
 
+        # load in the normalized features
+        temp_normalize_list = [line.rstrip("\n") for line in open("td_normalization_values.txt")]
+        self.normalize_list = []
+        for item in temp_normalize_list:
+            temp_float = []
+            temp = item.split(" ")
+            temp_float.append(float(temp[0]))
+            temp_float.append(float(temp[1]))
+            self.normalize_list.append(temp_float)
+
+
+
 
     def gateNumLookup(self, name):
         if (name == "inv1"):
@@ -357,13 +370,9 @@ class synthesisLSA(object):
         # node fanin features
         count = 0
         for in_gate in self.input_connections[node[3]]:
-            if(count < 4):
-                if (in_gate in self.gate_features):
-                    for feat in self.gate_features[in_gate]:
-                        feature.append(feat)
-                else:
-                    for i in range(0, 6):
-                        feature.append("0")
+            if (in_gate in self.gate_features):
+                for feat in self.gate_features[in_gate]:
+                    feature.append(feat)
                 count = count + 1
         while(count < 4):
             for i in range(0, 6):
@@ -372,13 +381,9 @@ class synthesisLSA(object):
         # node fanout features
         count = 0
         for out_gate in self.output_connections[node[3]]:
-            if(count < 10):
-                if (out_gate in self.gate_features):
-                    for feat in self.gate_features[out_gate]:
-                        feature.append(feat)
-                else:
-                    for i in range(0,6):
-                        feature.append("0")
+            if (out_gate in self.gate_features):
+                for feat in self.gate_features[out_gate]:
+                    feature.append(feat)
                 count = count + 1
         while (count < 10):
             for i in range(0, 6):
@@ -388,11 +393,19 @@ class synthesisLSA(object):
         feature.append(self.getIntrinsic(node[0], replacement))
         feature.append(self.current_max_error)
         feature.append(self.current_avg_error)
-        print(feature)
         # normalize the feature
+        for i in range(0, 93):
+            temp = feature[i]
+            feature[i] = (float(feature[i]) - self.normalize_list[i][0]) / (self.normalize_list[i][1] - self.normalize_list[i][0])
+            # handle circuits we haven't seen before // extreme cases
+            if (feature[i] < 0):
+                feature[i] = 0
+            elif (feature[i] > 1):
+                feature[i] = 1
 
 
 
+        return feature
 
 
     # converts the network stored by level and converts to a flattened list of all nodes
@@ -543,14 +556,15 @@ class synthesisLSA(object):
     # gets the error from the dnn
     # every n times runs self.dnnCheckError() and checks how off it is
     def dnnGetError(self, node, replacement):
-        self.genFeature(node, replacement)
+        # have some sort of count
+
+        # normalized feature is a list of float values of length 93
+        normalized_feature = self.genFeature(node, replacement)
+
+
+        # calculating error now just for testing
         self.calcOutputError()
 
-    # gets the current error, then runs self.calcOutputError()
-    # returns how off the error is
-    def dnnCheckError(self, node, replacement):
-        # call self.calcOutputError()
-        self.dnnGetError(node, replacement)
 
 
     # -- Returns the absolute error of the current network
@@ -639,7 +653,7 @@ class synthesisLSA(object):
                     self.gate_error[index] = self.getIntrinsic(fast_gate, orig_gate[0])
                     self.updateFeature(temp, fast_gate)
                     #self.calcOutputError()
-                    self.dnnCheckError(self.getNode(orig_gate), fast_gate)
+                    self.dnnGetError(self.getNode(orig_gate), fast_gate)
                     count = count + 1
                     # if error contraint violated, replace the node with the original and set local error to 0
                     if (float(self.current_avg_error) > self.error_constraint):
@@ -686,7 +700,7 @@ class synthesisLSA(object):
                             self.gate_error[gate[2]] = self.getIntrinsic(orig_gate[0], faster_gate)
                             self.updateFeature(gate, faster_gate)
                             # self.calcOutputError()
-                            self.dnnCheckError(self.getNode(orig_gate), faster_gate)
+                            self.dnnGetError(self.getNode(orig_gate), faster_gate)
                             count = count + 1
                             if (float(self.current_avg_error) > self.error_constraint):
                                 self.nodes_changed.remove(gate[3])

@@ -28,7 +28,7 @@ def runABC():
 
 
 # test driver program to test the synthesisLSA class on a network
-command = "benchfolder/ISCAS85/priority.blif"
+command = "benchfolder/ISCAS85/c1238.bench"
 writeRuntxt(command)
 runABC()
 command = "python3 blif_to_custom_bench.py > original.bench"
