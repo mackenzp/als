@@ -337,6 +337,11 @@ for level in range(0, max_level):
                             final_errors_temp = [line.rstrip("\n") for line in open("final_error.txt")]
                             final_errors = final_errors_temp[0]
 
+                            #file_test = open("error_test.txt", "a+")
+                            #file_test.write(final_errors)
+                            #file_test.write("\n")
+                            #file_test.close()
+
                             vector_string = train_data[curr_node] + " " + str(M_error) + " " + initial_errors + " " + final_errors
 
                             #duplicate_check_input = train_data[curr_node] + str(M_error) + " " + initial_errors
@@ -406,6 +411,7 @@ file.close()
 # remove any duplicates feature vectors in the training data
 master_set = set(master_list)
 master_list = list(master_set)
+
 
 # append to train_dnn.txt file
 file = open("train_dnn.txt", "a+")

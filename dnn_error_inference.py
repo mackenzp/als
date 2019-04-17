@@ -5,29 +5,34 @@ Created on Sun Apr  7 16:09:56 2019
 @author: Souvik Kundu
 """
 
-import numpy as np
-from sklearn.preprocessing import LabelEncoder
+#from sklearn.preprocessing import LabelEncoder
 
+#from keras.layers import Dense, Dropout, Activation
+#from keras.layers.normalization import BatchNormalization
+#from keras.regularizers import l2
+#from keras.optimizers import Adam
+#from keras import backend as K
+#from keras.models import Model
+#from keras.callbacks import ModelCheckpoint
+#from sklearn.utils import shuffle
+#from math import ceil
+#from keras.utils import np_utils
+#from keras import optimizers
+
+import numpy as np
 from keras.models import Sequential
-from keras.layers import Dense, Dropout, Activation
-from keras.layers.normalization import BatchNormalization
-from keras.regularizers import l2
-from keras.optimizers import Adam
-from keras import backend as K
-from keras.models import Model
 from keras.models import load_model
-from keras.callbacks import ModelCheckpoint
-from sklearn.utils import shuffle
-from math import ceil
-from keras.utils import np_utils
-from keras import optimizers
+
 
 # provide the test data_path where you have the x_data i,e, the input vectors
 dataset_path = '<provide name>'
 
 loaded = np.load(dataset_path)
 
-xpred = loaded['x_train'][:] 
+xpred = loaded['x_train'][:]
+
+
+
 
 del loaded
 

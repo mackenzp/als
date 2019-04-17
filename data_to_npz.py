@@ -62,7 +62,7 @@ for fetr in range (num_features):
     file.write(str(max))
     file.write("\n")
     for itr in range (flen):
-        xdata[itr][fetr] = (xdata[itr,fetr] - min) / max - min) 
+        xdata[itr][fetr] = (xdata[itr,fetr] - min) / (max - min)
         
         loadingBar(loadbar_count, loadbar_total, 3)
         loadbar_count = loadbar_count + 1
@@ -70,15 +70,10 @@ for fetr in range (num_features):
 file.close()
 
 for itr in range (flen):
-    if (ydata[itr][1] <= 0.5 ):
-        ydata[itr][1] = np.ceil(40 * ydata[itr,1]/0.5)
+    if (ydata[itr][0] <= 0.5 ):
+        ydata[itr][0] = np.ceil(40 * ydata[itr,0]/0.5)
     else :
-        ydata[itr][1] = np.ceil(10 * (ydata[itr,1] - 0.5)/0.5) + 40 
+        ydata[itr][0] = np.ceil(10 * (ydata[itr,0] - 0.5)/0.5) + 40
     loadingBar(loadbar_count, loadbar_total, 3)
     loadbar_count = loadbar_count + 1
-np.savez_compressed(trainfile, x_train = xdata, y_train = ydata[:,1])
-
-        
-
-
-            
+np.savez_compressed(trainfile, x_train = xdata, y_train = ydata[:,0])

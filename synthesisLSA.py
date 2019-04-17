@@ -14,6 +14,11 @@ import sys
 import random
 from operator import itemgetter
 
+# for the dnn
+import numpy as np
+from keras.models import Sequential
+from keras.models import load_model
+
 # class container for network approximation ------------------------------------------------
 class synthesisLSA(object):
     # -- Constructors -------------------------------------------------------------------------
@@ -56,6 +61,11 @@ class synthesisLSA(object):
         self.crit_path = []
         self.truthTable = {}
         self.numInputs = {}
+
+        # dnn initialization
+        self.model = Sequential()
+        self.model = load_model('model_data_error_train.h5')
+
     # --------------------------------------------------------------------------------------
 
     # Class methods ------------------------------------------------------------------------
@@ -391,9 +401,9 @@ class synthesisLSA(object):
             count = count + 1
         # append on local error, current_max_error, current_avg_error
         feature.append(self.getIntrinsic(node[0], replacement))
-        feature.append(self.current_max_error)
         feature.append(self.current_avg_error)
-        # normalize the feature
+        feature.append(self.current_max_error)
+        # normalize the feature based on training data
         for i in range(0, 93):
             temp = feature[i]
             feature[i] = (float(feature[i]) - self.normalize_list[i][0]) / (self.normalize_list[i][1] - self.normalize_list[i][0])
@@ -402,8 +412,6 @@ class synthesisLSA(object):
                 feature[i] = 0
             elif (feature[i] > 1):
                 feature[i] = 1
-
-
 
         return feature
 
@@ -553,18 +561,52 @@ class synthesisLSA(object):
         self.current_max_error = final_errors[1]
 
 
+    def testDnn(self):
+
+        feature = [6, 1, 5, 0, 1, 0.166667, 6, 0, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 3, 1, 18, 2, 0.333333, 6, 2, 1, 4, 3, 0.500000, 6, 2, 1, 7, 2, 0.333333, 6, 3, 1, 5, 2, 0.333333, 6, 3, 1, 5, 2, 0.333333, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.25, 0.0388167, 0.280609]
+
+        print(len(feature))
+        for i in range(0, 93):
+            temp = feature[i]
+            feature[i] = (float(feature[i]) - self.normalize_list[i][0]) / (self.normalize_list[i][1] - self.normalize_list[i][0])
+            # handle circuits we haven't seen before // extreme cases
+            if (feature[i] < 0):
+                feature[i] = 0
+            elif (feature[i] > 1):
+                feature[i] = 1
+
+
+        nf_temp = np.array(feature)
+        nf = nf_temp.reshape(1,93)
+        ypred = self.model.predict(nf, batch_size=1, verbose=0)
+        print(ypred.shape, np.argmax(ypred))
+        if (np.argmax(ypred) < 41):
+            dnn_error = np.argmax(ypred[0]) * 0.0125  # (0.5/40 = 0.0125)
+        else:
+            dnn_error = ((np.argmax(ypred[0]) - 40) * 0.05) + 0.5  # (0.5/10)=0.05)
+
+        print(dnn_error)
+
     # gets the error from the dnn
     # every n times runs self.dnnCheckError() and checks how off it is
     def dnnGetError(self, node, replacement):
         # have some sort of count
-
         # normalized feature is a list of float values of length 93
         normalized_feature = self.genFeature(node, replacement)
+        nf_temp = np.array(normalized_feature)
+        nf = nf_temp.reshape(1,93)
+        ypred = self.model.predict(nf, batch_size=1, verbose=0)
+        #print(ypred.shape, np.argmax(ypred))
+        if (np.argmax(ypred) < 41):
+            dnn_error = np.argmax(ypred[0]) * 0.0125  # (0.5/40 = 0.0125)
+        else:
+            dnn_error = ((np.argmax(ypred[0]) - 40) * 0.05) + 0.5  # (0.5/10)=0.05)
 
 
         # calculating error now just for testing
         self.calcOutputError()
 
+        #print(dnn_error, self.current_avg_error)
 
 
     # -- Returns the absolute error of the current network

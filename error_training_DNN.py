@@ -33,6 +33,8 @@ ytr = loaded['y_train'][:ntr]
 
 xte = loaded['x_train'][ntr:]
 yte = loaded['y_train'][ntr:] 
+print(np.argmax(yte))
+print(np.max(yte))
 
 encoder_tr = LabelEncoder()
 encoder_tr.fit(ytr)
@@ -44,10 +46,16 @@ encoder_te.fit(yte)
 encoder_Yte = encoder_tr.transform(yte)
 yte = np_utils.to_categorical(encoder_Yte)
 
+apnd = np.zeros((13297, 2))
+yte = np.concatenate((yte, apnd), axis = 1)
+print(yte)
+
+
 del loaded
 
 print(xtr.shape)
 print(ytr.shape)
+print(yte.shape)
 
 model = Sequential()
 data_cols = xtr.shape[1]

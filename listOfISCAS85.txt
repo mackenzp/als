@@ -13,3 +13,5 @@ c6288.bench
 c7552.bench
 c880.bench
 c8.blif
+priority.blif
+router.blif
