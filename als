@@ -151,8 +151,9 @@ def mapApprox(command):
         init_area = network.calcArea(1)
         network.approxSynth()
         network.calcOutputError()
-        network.calcArea(1)
-        network.getCritPath()
+        repl_delay = network.calcDelay(1)
+        repl_area = network.calcArea(1)
+        #network.getCritPath()
         network.writeNodeTypes()
 
         system_call = "python3 node_types_to_blif.py"
@@ -171,6 +172,7 @@ def mapApprox(command):
         network.reset()
         network.loadLibraryStats()
         network.loadNetwork()
+        network.calcArea(1)
         network.printGates()
         network.getCritPath()
         network.printCritPath()
@@ -185,12 +187,18 @@ def mapApprox(command):
         print("Initial Critical Delay: | ", init_delay)
         print("Initial Area:           | ", init_area)
         print("----------------------------------")
+        print("PreMap Critical Delay:  | ", repl_delay)
+        print("PreMap Area:            | ", repl_area)
+        print("----------------------------------")
         print("Final Critical Delay:   | ", final_delay)
         print("Final Area:             | ", final_area)
         print("----------------------------------")
         print("Final Average Error:    | ", network.getAvgError())
+        print("Final Max Error:        | ", network.getMaxError())
+
         print("\n")
 
+        os.system("rm *.dot > /dev/null")
 
 # map the exact network using abc -----------------------------------------------------------
 def mapExact(command):

@@ -28,7 +28,7 @@ def runABC():
 
 
 # test driver program to test the synthesisLSA class on a network
-command = "benchfolder/ISCAS85/priority.blif"
+command = "benchfolder/ISCAS85/c499.bench"
 writeRuntxt(command)
 runABC()
 command = "python3 blif_to_custom_bench.py > original.bench"
@@ -37,12 +37,13 @@ command = "python3 node_extract.py original.bench"
 os.system(command)
 
 
-user_error_constraint = 0.20
+user_error_constraint = 0.05
 
 network = synthesisLSA(error_constraint=user_error_constraint)
 network.loadLibraryStats()
 network.loadNetwork()
 network.printGates()
 network.printStatus()
-#network.testDnn()
 network.approxSynth()
+network.areaClean()
+network.printStatus()

@@ -634,8 +634,8 @@ void Graph::calculateError() {
         
         
         // GATE zero one set to 0 by default
-        else if ((nodes[i].type == "zero" || nodes[i].type == "one") && size == 1) {
-          nodes[i].output_error = 0;
+        else if ((nodes[i].type == "zero" || nodes[i].type == "one")) {
+          nodes[i].output_error = nodes[i].gate_error;
         }
         
         else {

@@ -39,20 +39,28 @@ combined_orig_bench_gates = []
 for item in split_orig_bench_gates:
     name = item[0]
     item[1] = node_dict[item[0]]
-    temp = item[0] + " = " + item[1] + "("
-    for i in range(2,len(item)):
-        temp = temp + item[i]
+    if(item[1] != "one" and item[1] != "zero"):
+        temp = item[0] + " = " + item[1] + "("
+        for i in range(2, len(item)):
+            temp = temp + item[i]
+    else:
+        temp = item[0] + " = " + item[1]
+        temp = temp + "(-1)"
     combined_orig_bench_gates.append(temp)
 
-file = open("original.bench", "w")
 
+#for item in orig_bench_prim:
+#    print(item)
+#for item in combined_orig_bench_gates:
+#    print(item)
+
+
+file = open("original.bench", "w")
 for item in orig_bench_prim:
     file.write(item)
     file.write("\n")
-
 for item in combined_orig_bench_gates:
     file.write(item)
     file.write("\n")
-
 file.close()
 
