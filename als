@@ -9,6 +9,7 @@
 
 import os
 import copy
+import time
 from synthesisLSA import synthesisLSA
 
 # adds tab autocomplete capability ---------------------------------------------------------
@@ -129,6 +130,7 @@ def mapApprox(command):
         print("ERROR: invalid filetype for map_approx\n")
         return
     writeRuntxt(command)
+    start = time.clock()
     runABC()
 
     # extracts information about the nodes for approximate synthesis
@@ -162,6 +164,7 @@ def mapApprox(command):
         os.system(system_call)
         writeRuntxt("temp.blif")
         runABC()
+        end = time.clock()
         extract_command = "python3 blif_to_custom_bench.py > original.bench"
         os.system(extract_command)
         extract_command = "python3 node_extract.py original.bench"
@@ -181,6 +184,8 @@ def mapApprox(command):
 
 
         # see if a loading bar would look okay for savings on delay and area.
+
+        print("\nSynthesis Time:", round(end-start,6))
 
         print("\nResults:")
         print("----------------------------------")

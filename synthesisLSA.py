@@ -12,6 +12,7 @@ import os
 import copy
 import sys
 import random
+import math
 from operator import itemgetter
 
 # for the dnn
@@ -35,6 +36,11 @@ class synthesisLSA(object):
         self.current_max_error = 0.0
         self.current_area = 0.0
         self.current_delay = 0.0
+
+        self.energy = 0.0
+        self.alpha = 0.0
+        self.error_count = 0
+        self.last_calc_error = 0
 
         # techlib specific features
         self.lib_dict = {}
@@ -218,6 +224,14 @@ class synthesisLSA(object):
             self.all_features.append(temp_list)
             level_list.append(temp_list[4])
 
+        self.alpha = float(math.sqrt(len(level_list)))
+        self.energy = float(math.sqrt(len(level_list)))
+
+        # testing
+        #self.alpha = 1
+        #self.energy = 1
+
+
         # append the level onto the node_type list of lists
         temp_count = 0
         for item in nodes_types:
@@ -373,11 +387,23 @@ class synthesisLSA(object):
             print("Error: There has been a problem with gate naming internally.")
             exit(1)
 
+    # update the specific feature of the node if the node has been modified. Two ways of representing a node
     def updateFeature(self, node, replacement):
+        # represent the node index based in network sorted by nodes in level
         if (len(node) <= 2):
             self.gate_features[self.node_by_level[node[0]][node[1]][3]][3] = self.gateNumLookup(replacement)
+            # adjust feature if vdd or gnd replacement
+            if (self.node_by_level[node[0]][node[1]][0] == "one" or self.node_by_level[node[0]][node[1]][0] == "zero"):
+                # adjust fanin list
+                self.node_by_level[node[0]][node[1]][4] = []
+                self.gate_features[self.node_by_level[node[0]][node[1]][3]][1] = "0"
+        # pointing to the actual node, not index based
         else:
             self.gate_features[node[3]][3] = self.gateNumLookup(replacement)
+            if (node[0] == "zero" or node[0] == "one"):
+                node[4] = []
+                self.gate_features[node[3]][1] = "0"
+
 
     def genFeature(self, node, replacement):
         # replicate the feature generation of the training model based on the current network
@@ -571,6 +597,7 @@ class synthesisLSA(object):
         final_errors = final_errors_temp[0].split(" ")
         self.current_avg_error = final_errors[0]
         self.current_max_error = final_errors[1]
+        return self.current_avg_error
 
 
     def testDnn(self):
@@ -614,11 +641,17 @@ class synthesisLSA(object):
         else:
             dnn_error = ((np.argmax(ypred[0]) - 40) * 0.05) + 0.5  # (0.5/10)=0.05)
 
+        dnn_error = round(dnn_error - 0.0125, 4)
+        self.current_avg_error = dnn_error
 
-        # calculating error now just for testing
-        self.calcOutputError()
+        calibrate = self.alpha * (1- self.current_avg_error/self.error_constraint)
+        if (self.error_count >= calibrate):
+            self.last_calc_error = float(self.calcOutputError())
+            self.alpha = self.energy*(1-self.last_calc_error/self.error_constraint)
+            self.error_count = 0
 
-        #print(dnn_error, self.current_avg_error)
+        self.error_count = self.error_count + 1
+
 
 
     # -- Returns the absolute error of the current network
@@ -699,10 +732,13 @@ class synthesisLSA(object):
         # Critical Path Optimization (begin) -------------------------------------------------------
         temp = []
         count = 0
-        # break will end the loop
+
+        node_hist = []
+        index_hist = []
+
         while(1):
             # prints the loading bar
-            sys.stdout.write("\r" + "Trying: " + str(count) + " | " + "Error: " + str(self.current_avg_error) + "     ")
+            sys.stdout.write("\r" + "Trying: " + str(count) + " | " + "Critical Delay: " + str(self.current_delay) + "     ")
             # previous change // used for stopping condition
             last_temp = temp
             # cp is the list of the critical path
@@ -734,16 +770,25 @@ class synthesisLSA(object):
                     # add the error of the replacement to the gate_error list // later printed to calc error
                     self.gate_error[index] = self.getIntrinsic(fast_gate, orig_gate[0])
                     self.updateFeature(temp, fast_gate)
-                    #self.calcOutputError()
-                    self.dnnGetError(self.getNode(orig_gate), fast_gate)
+
+                    node_hist.append(orig_gate)
+                    index_hist.append(temp)
+
+                    #self.dnnGetError(self.getNode(orig_gate), fast_gate)
+                    self.calcOutputError()
                     count = count + 1
                     # if error contraint violated, replace the node with the original and set local error to 0
                     if (float(self.current_avg_error) > self.error_constraint):
-                        self.nodes_changed.remove(firstgate[0])
-                        self.node_by_level[temp[0]][temp[1]][0] = orig_gate[0]
-                        self.gate_error[index] = 0
-                        self.updateFeature(temp, orig_gate[0])
                         self.calcOutputError()
+                        while(float(self.current_avg_error) > self.error_constraint):
+                            orig_gate = node_hist.pop()
+                            orig_index = index_hist.pop()
+                            index = self.node_by_level[orig_index[0]][orig_index[1]][2]
+                            if (orig_gate[3] in self.nodes_changed):
+                                self.nodes_changed.remove(orig_gate[3])
+                            self.node_by_level[orig_index[0]][orig_index[1]][0] = orig_gate[0]
+                            self.gate_error[index] = "0"
+                            self.calcOutputError()
                         break
                 # if the node has been changed, change the node back to the original gate
                 else:
@@ -755,9 +800,12 @@ class synthesisLSA(object):
                 self.calcOutputError()
                 break
 
+        #node_hist = []
+        #index_hist = []
+
         while (1):
             # prints the loading bar
-            sys.stdout.write("\r" + "Trying: " + str(count) + " | " + "Error: " + str(self.current_avg_error) + "     ")
+            sys.stdout.write("\r" + "Trying: " + str(count) + " | " + "Critical Delay: " + str(self.current_delay) + "     ")
             # previous change // used for stopping condition
             last_temp = temp
             # cp is the list of the critical path
@@ -794,15 +842,27 @@ class synthesisLSA(object):
                     #print(fast_gate, orig_gate[0], self.gate_error[index], "\n")
                     self.updateFeature(temp, fast_gate)
                     self.levelToFlat()
-                    self.calcOutputError()
+
+                    node_hist.append(orig_gate)
+                    index_hist.append(temp)
+
                     #self.dnnGetError(self.getNode(orig_gate), fast_gate)
+                    self.calcOutputError()
+
+
                     count = count + 1
                     # if error contraint violated, replace the node with the original and set local error to 0
                     if (float(self.current_avg_error) > self.error_constraint):
-                        self.node_by_level[temp[0]][temp[1]][0] = orig_gate[0]
-                        self.gate_error[index] = 0
-                        self.updateFeature(temp, orig_gate[0])
                         self.calcOutputError()
+                        while (float(self.current_avg_error) > self.error_constraint):
+                            orig_gate = node_hist.pop()
+                            orig_index = index_hist.pop()
+                            index = self.node_by_level[orig_index[0]][orig_index[1]][2]
+                            if (orig_gate[3] in self.nodes_changed):
+                                self.nodes_changed.remove(orig_gate[3])
+                            self.node_by_level[orig_index[0]][orig_index[1]][0] = orig_gate[0]
+                            self.gate_error[index] = "0"
+                            self.calcOutputError()
                         break
                 # if the node has been changed, change the node back to the original gate
                 else:
@@ -825,14 +885,19 @@ class synthesisLSA(object):
         # This happens after minimizing the critical path
         continue_to_area_opt = 1
         count = 0
+
+        node_hist = []
+        index_hist = []
+
         # iteration version
         if(continue_to_area_opt):
+            self.calcArea(1)
             print("\n\nOptimizing area with left over error constraint...")
             cont_break = 0
             for level in range(0, len(self.node_by_level)-1):
                 for i in range(0,len(self.node_by_level[level])-1):
                     gate = self.node_by_level[level][i]
-                    if (gate[3] not in self.nodes_changed and "one" not in gate[3] and "zero" not in gate[3]):
+                    if (gate[3] not in self.nodes_changed and gate[0] != "one" and gate[0] != "zero"):
                         orig_gate = copy.deepcopy(gate)
                         faster_gate = self.fastestNode(orig_gate[0])
                         if (orig_gate[0] != faster_gate):
@@ -841,23 +906,46 @@ class synthesisLSA(object):
                             self.gate_error[gate[2]] = self.getIntrinsic(orig_gate[0], faster_gate)
                             self.updateFeature(gate, faster_gate)
                             # self.calcOutputError()
-                            self.dnnGetError(self.getNode(orig_gate), faster_gate)
+
+                            temp = []
+                            temp.append(level)
+                            temp.append(i)
+                            node_hist.append(orig_gate)
+                            index_hist.append(temp)
+
+                            #self.dnnGetError(self.getNode(orig_gate), faster_gate)
+                            self.calcOutputError()
+
                             count = count + 1
                             if (float(self.current_avg_error) > self.error_constraint):
-                                self.nodes_changed.remove(gate[3])
-                                gate[0] = orig_gate[0]
-                                self.node_by_level[level][i][0] = orig_gate[0]
-                                self.gate_error[gate[2]] = 0
-                                self.updateFeature(gate, orig_gate[0])
                                 self.calcOutputError()
-                                count = count - 1
-                                cont_break = 1
+                                while (float(self.current_avg_error) > self.error_constraint):
+                                    orig_gate = node_hist.pop()
+                                    orig_index = index_hist.pop()
+                                    index = self.node_by_level[orig_index[0]][orig_index[1]][2]
+                                    if (orig_gate[3] in self.nodes_changed):
+                                        self.nodes_changed.remove(orig_gate[3])
+                                    self.node_by_level[orig_index[0]][orig_index[1]][0] = orig_gate[0]
+                                    self.gate_error[index] = "0"
+                                    self.calcOutputError()
                                 break
-                    self.calcArea(1)
-                    sys.stdout.write("\r" + "Trying: " + str(count) + " | " \
-                                    + "Error: " + str(self.current_avg_error) + "      ")
+
+                                #self.nodes_changed.remove(gate[3])
+                                #gate[0] = orig_gate[0]
+                                #self.node_by_level[level][i][0] = orig_gate[0]
+                                #self.gate_error[gate[2]] = 0
+                                #self.updateFeature(gate, orig_gate[0])
+                                #self.calcOutputError()
+                                #count = count - 1
+                                #cont_break = 1
+                                #break
+
+                sys.stdout.write("\r" + "Trying: " + str(count) + " | " + "Area: " + str(self.current_area) + "     ")
+
                 if (cont_break):
                     break
+
+            self.calcArea(1)
 
 
 
