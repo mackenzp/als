@@ -5,7 +5,7 @@
 # Example:
 
 import os
-from synthesisLSA import synthesisLSA
+from synthesisEngine import synthesisEngine
 
 def writeRuntxt(command):
     file = open("run.txt", "w")
@@ -27,8 +27,8 @@ def runABC():
 
 
 
-# test driver program to test the synthesisLSA class on a network
-command = "benchfolder/ISCAS85/c432.bench"
+# test driver program to test the synthesisEngine class on a network
+command = "benchfolder/ITC99/b1.blif"
 writeRuntxt(command)
 runABC()
 command = "python3 blif_to_custom_bench.py > original.bench"
@@ -39,11 +39,11 @@ os.system(command)
 
 user_error_constraint = 0.05
 
-network = synthesisLSA(error_constraint=user_error_constraint)
+network = synthesisEngine(error_constraint=user_error_constraint)
 network.loadLibraryStats()
 network.loadNetwork()
 network.printGates()
 network.printStatus()
-network.approxSynth()
-network.areaClean()
+network.approxSynth(dnn=True)
+network.areaClean(dnn=True)
 network.printStatus()

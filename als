@@ -1,16 +1,13 @@
 #!/usr/bin/python3
 
-# Author(s): Mackenzie Peterson, Moises Herrera.
+# Author(s): Mackenzie Peterson
 # Description:  This file acts as the user control for DNN training, approximate synthesis,
 #               exact synthesis, and file I/O.
-
-
-
 
 import os
 import copy
 import time
-from synthesisLSA import synthesisLSA
+from synthesisEngine import synthesisEngine
 
 # adds tab autocomplete capability ---------------------------------------------------------
 try:
@@ -30,8 +27,7 @@ def printInit():
 
 # gets the user command from the terminal --------------------------------------------------
 def getCommand():
-    print("als > ",end="")
-    command = input()
+    command = input("als > ")
     return command
 
 # ------------------------------------------------------------------------------------------
@@ -74,11 +70,12 @@ def is_float(s_in):
 # prints the possible commands that can be run for the user --------------------------------
 def printHelp(): 
     print("\tSynthesize Command(s):")
-    print("\t map_approx    <file_path (.blif or .bench)>   <error constraint (0 - 1.0)>")
+    print("\t map_approx    <file_path (.blif or .bench)>   <error constraint (0 - 1.0)>   <-nodnn flag if no dnn desired>")
     print("\t map_exact     <file_path (.blif or .bench)>")
     print("\n")
     print("\tWrite Command(s):")
     print("\t write_blif    <filename (.blif)>")
+    print("\t print_error")
     print("\n")
     print("\tTrain Command(s):")
     print("\t train_dnn")
@@ -107,12 +104,17 @@ def writeBlif(command):
 # utilizes the DNN to do approximate synthesis ----------------------------------------------
 def mapApprox(command):
 
+    util_dnn = True
     # ensure the argument is valid
     command_list = command.split(" ")
-    if(len(command_list)!=3):
+    if(len(command_list) == 4 and "-nodnn" in command_list):
+        print("\nNot Utilizing DNN")
+        util_dnn = False
+    elif(len(command_list)!=3):
         print("ERROR: map_approx should have two arguments")
         print("\t map_approx    <file_path (.blif or .bench)>   <error constraint (0 - 1.0)>")
         return
+
     for item in command_list:
         if("map_approx" in item):
             command_list.remove(item)
@@ -130,7 +132,6 @@ def mapApprox(command):
         print("ERROR: invalid filetype for map_approx\n")
         return
     writeRuntxt(command)
-    start = time.clock()
     runABC()
 
     # extracts information about the nodes for approximate synthesis
@@ -143,7 +144,7 @@ def mapApprox(command):
     if(not checkABCError(command)):
 
         print("\nExact Network:")
-        network = synthesisLSA(error_constraint=user_error_constraint)
+        network = synthesisEngine(error_constraint=user_error_constraint)
         network.loadLibraryStats()
         network.loadNetwork()
         network.printGates()
@@ -151,12 +152,19 @@ def mapApprox(command):
         network.printCritPath()
         init_delay = network.calcDelay(1)
         init_area = network.calcArea(1)
-        network.approxSynth()
-        network.calcOutputError()
+        start = time.time()
+        network.approxSynth(dnn=util_dnn)
+        network.areaClean(dnn=util_dnn)
+        end = time.time()
+        error = network.calcOutputError()
         repl_delay = network.calcDelay(1)
         repl_area = network.calcArea(1)
         #network.getCritPath()
         network.writeNodeTypes()
+
+        # get the error at all outputs
+        command = "./error -all"
+        os.system(command)
 
         system_call = "python3 node_types_to_blif.py"
         os.system(system_call)
@@ -164,7 +172,6 @@ def mapApprox(command):
         os.system(system_call)
         writeRuntxt("temp.blif")
         runABC()
-        end = time.clock()
         extract_command = "python3 blif_to_custom_bench.py > original.bench"
         os.system(extract_command)
         extract_command = "python3 node_extract.py original.bench"
@@ -182,10 +189,7 @@ def mapApprox(command):
         final_delay = network.calcDelay(1)
         final_area = network.calcArea(1)
 
-
-        # see if a loading bar would look okay for savings on delay and area.
-
-        print("\nSynthesis Time:", round(end-start,6))
+        print("\nSynthesis Time (seconds):", round(end-start,6))
 
         print("\nResults:")
         print("----------------------------------")
@@ -198,8 +202,8 @@ def mapApprox(command):
         print("Final Critical Delay:   | ", final_delay)
         print("Final Area:             | ", final_area)
         print("----------------------------------")
-        print("Final Average Error:    | ", network.getAvgError())
-        print("Final Max Error:        | ", network.getMaxError())
+        print("Final Average Error:    | ", error)
+        #print("Final Max Error:        | ", network.getMaxError())
 
         print("\n")
 
@@ -216,16 +220,38 @@ def mapExact(command):
         if("map_exact" in item):
             command_list.remove(item)
     command = command_list[0]
-    if (".bench" not in command or len(command)<=6):
+    if ((".bench" not in command and ".blif" not in command) or len(command)<=6):
         print("ERROR: invalid filetype for map_exact\n")
         return
     writeRuntxt(command)
     runABC()
     # write to original.bench in case user wants to write_blif
     os.system("python3 blif_to_custom_bench.py > original.bench")
-    print("\nNetwork has been mapped with:\nAverage error:\t0%\nMax error:\t0%\n")
+    extract_command = "python3 node_extract.py original.bench"
+    os.system(extract_command)
+
+    print("\nExact Network:")
+    network = synthesisEngine(error_constraint=0)
+    network.loadLibraryStats()
+    network.loadNetwork()
+    network.printGates()
+    network.getCritPath()
+    network.printCritPath()
+    network.calcOutputError()
+    command = "./error -all"
+    os.system(command)
+    print("\nNetwork has been mapped with:\nAverage error:\t0%\n")
+
+    os.system("rm *.dot > /dev/null")
 
 
+def printError():
+    all_final_errors_temp = [line.rstrip("\n") for line in open("final_error_all_outputs.txt")]
+    print("\nNode Name: -> Error")
+    print("--------------------")
+    for item in all_final_errors_temp:
+        print(item)
+    print("\n")
 
 # executes the training flow for the DNN -- later should specify the directory of bench files-
 def trainDNN():
@@ -245,6 +271,8 @@ def commandHandler(command):
         mapExact(command)
     elif ("write_blif" in command):
         writeBlif(command)
+    elif ("print_error" in command):
+        printError()
     elif ("train_dnn" in command):
         trainDNN()
     elif (command not in exit_list):
@@ -259,8 +287,6 @@ def main():
         command = getCommand()
         commandHandler(command)
     
-
-
 
 
 if __name__ == "__main__":
