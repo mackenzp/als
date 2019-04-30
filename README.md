@@ -138,7 +138,7 @@ large library of .bench and .blif files. Also, our prediction is that if a node 
 fanout greater than 10, that it would be unreasonable to approximate it as it has a
 relatively large fanout cone as compared to other more suitable replacement
 nodes. It is important to note that this is only used during the initial mapping phase. All node's features
-are captured inside of synthesisEngine.py and are continuously updated there, limiting abc to only be run once.  
+are captured inside of synthesisEngine.py and are continuously updated there, allowing abc to only be run once.  
 
 ### fanstats.py
 Python script that loads a large library of .bench and .blif files and generates some
