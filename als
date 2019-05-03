@@ -132,7 +132,9 @@ def mapApprox(command):
         print("ERROR: invalid filetype for map_approx\n")
         return
     writeRuntxt(command)
+    map_start = time.time()
     runABC()
+    map_end = time.time()
 
     # extracts information about the nodes for approximate synthesis
     extract_command = "python3 blif_to_custom_bench.py > original.bench"
@@ -166,6 +168,7 @@ def mapApprox(command):
         command = "./error -all"
         os.system(command)
 
+        #start = time.time()
         system_call = "python3 node_types_to_blif.py"
         os.system(system_call)
         system_call = "python3 custom_bench_to_blif.py original.bench > temp.blif"
@@ -177,6 +180,8 @@ def mapApprox(command):
         extract_command = "python3 node_extract.py original.bench"
         os.system(extract_command)
         os.system("rm temp.blif")
+        #end = time.time()
+
 
         print("\n\nApproximated Network:")
         network.reset()
@@ -189,7 +194,7 @@ def mapApprox(command):
         final_delay = network.calcDelay(1)
         final_area = network.calcArea(1)
 
-        print("\nSynthesis Time (seconds):", round(end-start,6))
+        print("\nSynthesis Time (seconds):", round(end - start,6))
 
         print("\nResults:")
         print("----------------------------------")

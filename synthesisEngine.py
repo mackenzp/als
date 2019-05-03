@@ -310,6 +310,8 @@ class synthesisEngine(object):
 
         self.levelToFlat()
         self.loadFeatures()
+        self.init_area = float(self.calcArea(1))
+
 
     # initializes every node's features for feature injection into the DNN during error prediction
     def loadFeatures(self):
@@ -734,6 +736,27 @@ class synthesisEngine(object):
         else:
             print("This library only has 4 inputs")
 
+
+    def optArea(self, gate):
+        num_inputs = self.numInputs[gate[0]]
+        if ("nand" in gate[0] or "inv" in gate[0] or "one" in gate[0] or "zero" in gate[0]):
+            return gate[0]
+        gate_results = []
+        max = -1
+        for i in self.numInputs:
+            if (num_inputs == self.numInputs[i]):
+                error = self.getIntrinsic(gate[0], i)
+                area = float(self.lib_dict[gate[0]]['area'])/float(self.lib_dict[i]['area'])
+                if(error != 0):
+                    cost = area/error
+                else:
+                    cost = 1
+                #print(gate[0], i, error, cost)
+                if(cost > max):
+                    max = cost
+                    opt_gate = i
+        return opt_gate
+
     def getNode(self, node):
         if (len(node) <= 2):
             return self.node_by_level[node[0]][node[1]]
@@ -753,6 +776,8 @@ class synthesisEngine(object):
         index_hist = []
 
         while(1):
+            if(float(self.calcArea(1))/self.init_area <= 0.35):
+                break
             # prints the loading bar
             sys.stdout.write("\r" + "Trying: " + str(count) + " | " + "Critical Delay: " + str(self.current_delay) + "     ")
             # previous change // used for stopping condition
@@ -822,6 +847,8 @@ class synthesisEngine(object):
         #index_hist = []
 
         while (1):
+            if(float(self.calcArea(1))/self.init_area <= 0.35):
+                break
             # prints the loading bar
             sys.stdout.write("\r" + "Trying: " + str(count) + " | " + "Critical Delay: " + str(self.current_delay) + "     ")
             # previous change // used for stopping condition
@@ -913,11 +940,14 @@ class synthesisEngine(object):
             print("\n\nOptimizing area with left over error constraint...")
             cont_break = 0
             for level in range(0, len(self.node_by_level)-1):
+                if (float(self.calcArea(1)) / self.init_area <= 0.35):
+                    break
                 for i in range(0,len(self.node_by_level[level])-1):
                     gate = self.node_by_level[level][i]
                     if (gate[3] not in self.nodes_changed and gate[0] != "one" and gate[0] != "zero"):
                         orig_gate = copy.deepcopy(gate)
                         faster_gate = self.fastestNode(orig_gate[0])
+                        #faster_gate = self.optArea(orig_gate)
                         if (orig_gate[0] != faster_gate):
                             self.node_by_level[level][i][0] = faster_gate
                             self.nodes_changed.append(gate[3])
@@ -949,16 +979,6 @@ class synthesisEngine(object):
                                     self.gate_error[index] = "0"
                                     self.calcOutputError()
                                 break
-
-                                #self.nodes_changed.remove(gate[3])
-                                #gate[0] = orig_gate[0]
-                                #self.node_by_level[level][i][0] = orig_gate[0]
-                                #self.gate_error[gate[2]] = 0
-                                #self.updateFeature(gate, orig_gate[0])
-                                #self.calcOutputError()
-                                #count = count - 1
-                                #cont_break = 1
-                                #break
 
                 sys.stdout.write("\r" + "Trying: " + str(count) + " | " + "Area: " + str(self.current_area) + "     ")
 
