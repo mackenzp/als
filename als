@@ -70,7 +70,7 @@ def is_float(s_in):
 # prints the possible commands that can be run for the user --------------------------------
 def printHelp(): 
     print("\tSynthesize Command(s):")
-    print("\t map_approx    <file_path (.blif or .bench)>   <error constraint (0 - 1.0)>   <-nodnn flag if no dnn desired>")
+    print("\t map_approx    <file_path (.blif or .bench)>   <error constraint (0 - 1.0)>")
     print("\t map_exact     <file_path (.blif or .bench)>")
     print("\n")
     print("\tWrite Command(s):")
