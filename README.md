@@ -119,7 +119,7 @@ A few of the implemented methods are listed and act as support for the ALS frame
 
 
 ### synthesisDriver.py
-This file acts as a testing environment for the synthesisLSA class
+This file acts as a testing environment for the synthesisEngine class
 
 ### blif_to_custom_bench.py
 The python script takes the .blif and generates this custom .bench file to then be read
