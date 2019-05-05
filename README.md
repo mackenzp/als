@@ -4,7 +4,7 @@ An Approximate Logic Synthesis Tool combining technology mapping techniques (fro
 Deep Neural Network (trained based on boolean difference calculus) to predict the future output error of a network with an incremental logic gate approximation.
 
 ## Installation
-- Make sure that you have python3.6 or newer (written using python 3.6.7)
+- Make sure that you are using python3.6 or newer (written using python 3.6.7)
 - Install pip using the following: `sudo apt install python3-pip`
 - Install required packages using the following: `pip3 install -r requirements.txt`
 
