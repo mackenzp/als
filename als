@@ -25,6 +25,12 @@ def printInit():
     print("USC Approximate Logic Synthesis Suite v1.0")
     print("For a list of commands, please type \"help\"")
 
+# initialized files when als is opened -----------------------------------------------------
+def initFiles():
+    file = open("final_error_all_outputs.txt","w")
+    file.write("\nNo network has been approximated yet\n")
+    file.close()
+
 # gets the user command from the terminal --------------------------------------------------
 def getCommand():
     command = input("als > ")
@@ -318,6 +324,7 @@ def commandHandler(command):
 # ------------------------------------------------------------------------------------------
 def main():
     printInit()
+    initFiles()
     command = ""
     exit_list = ["quit", "exit", "q"]
     while(command not in exit_list):
