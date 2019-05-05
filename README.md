@@ -14,6 +14,16 @@ Type './als' to run the als executable
 ALS utilizes Berkeley's open-source synthesis tool "ABC" as a base platform for initial exact technology mapping and feature extraction.
 The modified version of ABC is compiled, but to re-compile ABC type 'make clean' and then 'make'.
 
+## Example
+`[~/als, master+25]: ./als`  
+`Using TensorFlow backend.`  
+`USC Approximate Logic Synthesis Suite v1.0`  
+`For a list of commands, please type "help"`  
+`als > map_approx benchfolder/ISCAS85/c1196.bench 0.05`  
+`.`  
+`.`  
+`.`  
+
 <br>
 
 ## File Definitions:
