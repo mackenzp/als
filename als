@@ -130,7 +130,6 @@ def mapApprox(command):
     # checks that the user_error_constraint is of type float before continuing
     if(is_float(command_list[1])):
         user_error_constraint = float(command_list[1])
-        '''
         if (user_error_constraint <= 0.001):
             temp = init_command.split(" ")
             temp.pop(0)
@@ -141,7 +140,6 @@ def mapApprox(command):
             print("\nError Rate must be above 0.001, mapping exact network..")
             mapExact(new_command)
             return
-        '''
     else:
         print("ERROR: map_approx should have a valid error constraint between 0.0 and 1.0")
         print("\t map_approx    <file_path (.blif or .bench)>   <error constraint (0.0 - 1.0)>")
