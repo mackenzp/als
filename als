@@ -280,7 +280,6 @@ def printError():
 
 # executes the training flow for the DNN -----------------------------------------------------
 def trainDNN():
-    print("\nTraining will by default add to the previous training data. Remove train_dnn.txt to start fresh.")
     print("Please ensure that the intended training files are in \"/benchfolder/training_folder\"")
     train = input("Continue? [Y/N]: ")
     print("\n")

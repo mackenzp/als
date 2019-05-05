@@ -46,8 +46,8 @@ encoder_Yte = encoder_tr.transform(yte)
 yte = np_utils.to_categorical(encoder_Yte)
 
 #apnd = np.zeros((13297, 2))
-apnd = np.zeros((len(yte), 3))
-yte = np.concatenate((yte, apnd), axis = 1)
+#apnd = np.zeros((len(yte), 1))
+#yte = np.concatenate((yte, apnd), axis = 1)
 
 del loaded
 
