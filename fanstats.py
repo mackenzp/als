@@ -1,10 +1,13 @@
 import os
 import numpy as np
 
+print("\nIn order for this code to run, you will need to modify src/base/abc/abcShow.c and enable fanout stats")
+print("You will then have to \"make clean\" and then \"make\" in the /als directory to recompile abc")
+
 fanoutMaxSoFar = 0
 faninMaxSoFar = 0
 
-command = "ls benchfolder/allfiles > listOfAllBenchFiles.txt"
+command = "ls benchfolder/training_folder > listOfAllBenchFiles.txt"
 os.system(command)
 
 file = open("listOfAllBenchFiles.txt", "r")
@@ -36,7 +39,7 @@ for files in benchfilenames:
   file.write("read_library mcnc.genlib")
   file.write("\n")
 
-  file.write("read benchfolder/allfiles/")
+  file.write("read benchfolder/training_folder/")
   file.write(files)
   file.write("\n")
 
