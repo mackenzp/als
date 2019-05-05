@@ -3,15 +3,14 @@
 An Approximate Logic Synthesis Tool combining technology mapping techniques (from Berkeley's ABC synthesis tool) and a
 Deep Neural Network (trained based on boolean difference calculus) to predict the future output error of a network with an incremental logic gate approximation.
 
-## Required Packages:
-### Installation
+## Installation
 - Make sure that you have python3.6 or newer (written using python 3.6.7)
 - Install pip using the following: `sudo apt install python3-pip`
 - Install required packages using the following: `pip3 install -r requirements.txt`
 
 Type './als' to run the als executable
 
-## Compiling:
+## Recompiling ABC:
 ALS utilizes Berkeley's open-source synthesis tool "ABC" as a base platform for initial exact technology mapping and feature extraction.
 The modified version of ABC is compiled, but to re-compile ABC type 'make clean' and then 'make'.
 
