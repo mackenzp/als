@@ -105,6 +105,7 @@ def writeBlif(command):
 def mapApprox(command):
 
     util_dnn = True
+    init_command = copy.deepcopy(command)
     # ensure the argument is valid
     command_list = command.split(" ")
     if(len(command_list) == 4 and "-nodnn" in command_list):
@@ -123,9 +124,21 @@ def mapApprox(command):
     # checks that the user_error_constraint is of type float before continuing
     if(is_float(command_list[1])):
         user_error_constraint = float(command_list[1])
+        '''
+        if (user_error_constraint <= 0.001):
+            temp = init_command.split(" ")
+            temp.pop(0)
+            temp.pop(-1)
+            new_command = ""
+            for item in temp:
+                new_command = new_command + item + " "
+            print("\nError Rate must be above 0.001, mapping exact network..")
+            mapExact(new_command)
+            return
+        '''
     else:
-        print("ERROR: map_approx should have a valid error constraint between 0 and 1.0")
-        print("\t map_approx    <file_path (.blif or .bench)>   <error constraint (0 - 1.0)>")
+        print("ERROR: map_approx should have a valid error constraint between 0.0 and 1.0")
+        print("\t map_approx    <file_path (.blif or .bench)>   <error constraint (0.0 - 1.0)>")
         return
 
     if ((".bench" not in command and ".blif" not in command) or len(command)<=6):
@@ -207,12 +220,15 @@ def mapApprox(command):
         print("Final Critical Delay:   | ", final_delay)
         print("Final Area:             | ", final_area)
         print("----------------------------------")
-        print("Final Average Error:    | ", error)
-        #print("Final Max Error:        | ", network.getMaxError())
+        print("Error Rate:             | ", error)
 
         print("\n")
 
+        # unnecessary file removal
         os.system("rm *.dot > /dev/null")
+        command = "ls .model* > /dev/null 2>&1"
+        if (os.system(command) == 0):
+            os.system("rm .model* > /dev/null")
 
 # map the exact network using abc -----------------------------------------------------------
 def mapExact(command):
@@ -247,7 +263,11 @@ def mapExact(command):
     os.system(command)
     print("\nNetwork has been mapped with:\nAverage error:\t0%\n")
 
+    # unnecessary file removal
     os.system("rm *.dot > /dev/null")
+    command = "ls .model* > /dev/null 2>&1"
+    if (os.system(command) == 0):
+        os.system("rm .model* > /dev/null")
 
 
 def printError():
@@ -258,10 +278,23 @@ def printError():
         print(item)
     print("\n")
 
-# executes the training flow for the DNN -- later should specify the directory of bench files-
+# executes the training flow for the DNN -----------------------------------------------------
 def trainDNN():
-    train_script = "python3 extract_all_features.py"
-    os.system(train_script)
+    print("\nTraining will by default add to the previous training data. Remove train_dnn.txt to start fresh.")
+    print("Please ensure that the intended training files are in \"/benchfolder/training_folder\"")
+    train = input("Continue? [Y/N]: ")
+    print("\n")
+    if(train == "Y" or train == "y"):
+        # execute training process
+        extract_data = "python3 extract_all_features.py"
+        os.system(extract_data)
+        convert_to_npz = "python3 data_to_npz.py"
+        os.system(convert_to_npz)
+        train_dnn = "python3 error_training_DNN.py"
+        os.system(train_dnn)
+        return
+    else:
+        return
 
 # handles and distributes the commands from the user to their respective functions -----------
 def commandHandler(command):
@@ -281,7 +314,7 @@ def commandHandler(command):
     elif ("train_dnn" in command):
         trainDNN()
     elif (command not in exit_list):
-        print("Command not recognized\n")
+        print("Command not recognized, type \"help\" for a list of commands\n")
 
 # ------------------------------------------------------------------------------------------
 def main():

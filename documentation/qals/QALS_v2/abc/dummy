@@ -1,4 +1,0 @@
-read mcnc.genlib
-read_bench benchmarks/ISCAS85/c17.bench
-map
-print_stats -a

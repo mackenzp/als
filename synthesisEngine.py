@@ -43,6 +43,7 @@ class synthesisEngine(object):
         self.alpha = 0.0
         self.error_count = 0
         self.last_calc_error = 0
+        self.area_thresh = 0.35
 
         # techlib specific features
         self.lib_dict = {}
@@ -776,7 +777,7 @@ class synthesisEngine(object):
         index_hist = []
 
         while(1):
-            if(float(self.calcArea(1))/self.init_area <= 0.35):
+            if(float(self.calcArea(1))/self.init_area <= self.area_thresh):
                 break
             # prints the loading bar
             sys.stdout.write("\r" + "Trying: " + str(count) + " | " + "Critical Delay: " + str(self.current_delay) + "     ")
@@ -847,7 +848,7 @@ class synthesisEngine(object):
         #index_hist = []
 
         while (1):
-            if(float(self.calcArea(1))/self.init_area <= 0.35):
+            if(float(self.calcArea(1))/self.init_area <= self.area_thresh):
                 break
             # prints the loading bar
             sys.stdout.write("\r" + "Trying: " + str(count) + " | " + "Critical Delay: " + str(self.current_delay) + "     ")
@@ -940,7 +941,7 @@ class synthesisEngine(object):
             print("\n\nOptimizing area with left over error constraint...")
             cont_break = 0
             for level in range(0, len(self.node_by_level)-1):
-                if (float(self.calcArea(1)) / self.init_area <= 0.35):
+                if (float(self.calcArea(1)) / self.init_area <= self.area_thresh):
                     break
                 for i in range(0,len(self.node_by_level[level])-1):
                     gate = self.node_by_level[level][i]

@@ -22,10 +22,10 @@ import datetime
 
 print("NOTE: This will take a while. Ctrl-Z to suspend")
 
-command = "ls benchfolder/ISCAS85 > listOfISCAS85.txt"
+command = "ls benchfolder/training_folder > listOfTraining.txt"
 os.system(command)
 
-file = open("listOfISCAS85.txt", "r")
+file = open("listOfTraining.txt", "r")
 temp_names = file.readlines()
 benchfilenames = []
 
@@ -45,7 +45,7 @@ for benchFile in benchfilenames:
     file.write("read_library mcnc.genlib")
     file.write("\n")
 
-    file.write("read benchfolder/ISCAS85/")
+    file.write("read benchfolder/training_folder/")
     file.write(benchFile)
     file.write("\n")
 

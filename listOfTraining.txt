@@ -1,0 +1,10 @@
+alu1.blif
+c1196.bench
+c17.bench
+c3540.bench
+c499.bench
+c7552.bench
+c880.bench
+max1024.blif
+parity.blif
+rd53.blif

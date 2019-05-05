@@ -24,7 +24,8 @@ from keras import optimizers
 dataset_path = 'error_train.npz'
 loaded = np.load(dataset_path)
 val_split = 0.20
-total_test_vec = 66487
+total_test_vec = 66486
+total_test_vec = int(sum(1 for line in open('train_dnn.txt')))
 ## this is the training dataset size, change the value 66487 as the number of test vectors present in the file
 ntr = np.int(np.ceil(0.8*total_test_vec))
 
@@ -33,8 +34,6 @@ ytr = loaded['y_train'][:ntr]
 
 xte = loaded['x_train'][ntr:]
 yte = loaded['y_train'][ntr:] 
-print(np.argmax(yte))
-print(np.max(yte))
 
 encoder_tr = LabelEncoder()
 encoder_tr.fit(ytr)
@@ -46,16 +45,15 @@ encoder_te.fit(yte)
 encoder_Yte = encoder_tr.transform(yte)
 yte = np_utils.to_categorical(encoder_Yte)
 
-apnd = np.zeros((13297, 2))
+#apnd = np.zeros((13297, 2))
+apnd = np.zeros((len(yte), 3))
 yte = np.concatenate((yte, apnd), axis = 1)
-print(yte)
-
 
 del loaded
 
-print(xtr.shape)
-print(ytr.shape)
-print(yte.shape)
+#print(xtr.shape)
+#print(ytr.shape)
+#print(yte.shape)
 
 model = Sequential()
 data_cols = xtr.shape[1]
