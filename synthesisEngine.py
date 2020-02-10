@@ -24,7 +24,39 @@ logging.getLogger('tensorflow').setLevel(logging.ERROR)
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'  # or any {'0', '1', '2'}
 from keras.models import Sequential
 from keras.models import load_model
-
+#==============some utility functions:
+def Generate_Switching_File():
+    with open("run_sw.txt", "w") as fp:
+        fp.write("r mcnc.genlib; r original.blif; printSwitching; q;\n")
+    command = "./abc -f run_sw.txt > abc_sw.log"
+    os.system(command)
+def Sort_Switchings():
+    sw_val = []
+    sw = []
+    size = 0
+    tot = []
+    a_line = []
+    with open("nodes_switching.txt", "r") as fp:
+        for line in fp:
+            tmp = line.split(" ")
+            a_line = []
+            a_line.append(tmp[0])
+            a_line.append(float(tmp[1]))
+            tot.append(a_line)
+            sw_val.append(float(tmp[1]))
+            size += 1
+    # sort in descending order to have nodes with higher switching at lower indices
+    sw_val.sort(reverse=True)
+    #print(sw_val)
+    for idx in range(size):
+        for i in range(size):
+            if(tot[i][1] == sw_val[idx]):
+                sw.append(tot[i][0])
+                break
+    #print(sw)
+        
+    return sw
+            
 
 # class container for network approximation ------------------------------------------------
 class synthesisEngine(object):
@@ -102,6 +134,7 @@ class synthesisEngine(object):
     # -- load the contents of the technology library ---------------------------
     def loadLibraryStats(self):
         library = [line.rstrip("\n") for line in open("mcnc.genlib")]
+        #library = [line.rstrip("\n") for line in open("45nm.genlib")]
         lib_list = []
         for item in library:
             temp_list = item.replace("\t", " ").split(" ")
@@ -167,6 +200,7 @@ class synthesisEngine(object):
         self.nodes_changed = []
         self.crit_output = ""
         self.crit_path = []
+        self.crit_power = []
         self.truthTable = {}
         self.numInputs = {}
 
@@ -528,6 +562,7 @@ class synthesisEngine(object):
         self.calcDelay(1)
         self.crit_path = []
         gate = self.crit_output
+        print(gate)
         while(self.curr_delay_dict[gate]):
             max = -1
             name_delay = []
@@ -543,6 +578,12 @@ class synthesisEngine(object):
                         max = self.curr_delay_dict[in_gate]
                         gate = in_gate
         return self.crit_path
+
+    def getCritPowerNodes(self):
+        #run ABC for exatrcating switching activitiesL
+        Generate_Switching_File()
+        self.crit_power = Sort_Switchings()
+        return self.crit_power
 
 
     def printCritPath(self):
@@ -764,7 +805,177 @@ class synthesisEngine(object):
         else:
             return node
 
+
+
     def approxSynth(self, dnn):
+
+        print("Optmizing Delay...")
+        continue_to_area_opt = 0
+
+        # Critical Path Optimization (begin) -------------------------------------------------------
+        temp = []
+        count = 0
+
+        node_hist = []
+        index_hist = []
+
+        while(1):
+            if(float(self.calcArea(1))/self.init_area <= self.area_thresh):
+                break
+            # prints the loading bar
+            sys.stdout.write("\r" + "Trying: " + str(count) + " | " + "Critical Delay: " + str(self.current_delay) + "     ")
+            # previous change // used for stopping condition
+            last_temp = temp
+            # cp is the list of the critical path
+            #cp = self.getCritPath()
+            cp = self.getCritPowerNodes()
+            # get the first gate that hasnt been changed on the critical path
+            if(cp):
+                firstgate = cp.pop(-1)
+            while(firstgate[0] in self.nodes_changed):
+                if(cp):
+                    firstgate = cp.pop(-1)
+                else:
+                    break
+            # get the index of the gate in the network // temp is a list
+            temp = self.network_lookup[firstgate[0]]
+            # make a copy of the gate in case the error constraint is violated
+            orig_gate = copy.deepcopy(self.node_by_level[temp[0]][temp[1]])
+            # replace the gate in the network with the fastest gate
+            fast_gate = self.fastestNode(orig_gate[0])
+
+
+            if (fast_gate != orig_gate[0]):
+
+                self.node_by_level[temp[0]][temp[1]][0] = fast_gate
+                # if the gate has not been changed
+                if(firstgate[0] not in self.nodes_changed):
+                    # note the gate has been changed
+                    self.nodes_changed.append(firstgate[0])
+                    index = self.node_by_level[temp[0]][temp[1]][2]
+                    # add the error of the replacement to the gate_error list // later printed to calc error
+                    self.gate_error[index] = self.getIntrinsic(fast_gate, orig_gate[0])
+                    self.updateFeature(temp, fast_gate)
+
+                    node_hist.append(orig_gate)
+                    index_hist.append(temp)
+
+                    if (dnn):
+                        self.dnnGetError(self.getNode(orig_gate), fast_gate)
+                    else:
+                        self.calcOutputError()
+                    count = count + 1
+                    # if error contraint violated, replace the node with the original and set local error to 0
+                    if (float(self.current_avg_error) > self.error_constraint):
+                        self.calcOutputError()
+                        while(float(self.current_avg_error) > self.error_constraint):
+                            orig_gate = node_hist.pop()
+                            orig_index = index_hist.pop()
+                            index = self.node_by_level[orig_index[0]][orig_index[1]][2]
+                            if (orig_gate[3] in self.nodes_changed):
+                                self.nodes_changed.remove(orig_gate[3])
+                            self.node_by_level[orig_index[0]][orig_index[1]][0] = orig_gate[0]
+                            self.gate_error[index] = "0"
+                            self.calcOutputError()
+                        break
+                # if the node has been changed, change the node back to the original gate
+                else:
+                    self.node_by_level[temp[0]][temp[1]][0] = orig_gate
+            else:
+                self.nodes_changed.append(firstgate[0])
+            # stopping condition // if there is no option for further replacement to make the critical path better
+            if (last_temp == temp):
+                self.calcOutputError()
+                break
+
+        #node_hist = []
+        #index_hist = []
+
+        while (1):
+            if(float(self.calcArea(1))/self.init_area <= self.area_thresh):
+                break
+            # prints the loading bar
+            sys.stdout.write("\r" + "Trying: " + str(count) + " | " + "Critical Delay: " + str(self.current_delay) + "     ")
+            # previous change // used for stopping condition
+            last_temp = temp
+            # cp is the list of the critical path
+            #cp = self.getCritPath()
+            cp = self.getCritPowerNodes()
+            print("\n")
+            print(cp)
+            print("\n")
+            # get the first gate that hasnt been changed on the critical path
+            if (cp):
+                firstgate = cp.pop(0)
+            while ("nand" not in firstgate[0]):
+                if (cp):
+                    firstgate = cp.pop(0)
+                else:
+                    break
+            #print(firstgate)
+            # get the index of the gate in the network // temp is a list
+            temp = self.network_lookup[firstgate[0]]
+            # make a copy of the gate in case the error constraint is violated
+            orig_gate = copy.deepcopy(self.node_by_level[temp[0]][temp[1]])
+            # replace the gate in the network with the fastest gate
+            if (self.getIntrinsic("one", orig_gate[0]) <= self.getIntrinsic("zero", orig_gate[0])):
+                fast_gate = "one"
+            else:
+                fast_gate = "zero"
+
+            if (fast_gate != orig_gate[0]):
+
+                self.node_by_level[temp[0]][temp[1]][0] = fast_gate
+                # if the gate has not been changed
+                if (firstgate[0] is not "one" and firstgate is not "zero"):
+                    # note the gate has been changed
+                    #self.nodes_changed.append(firstgate[0])
+                    index = self.node_by_level[temp[0]][temp[1]][2]
+                    # add the error of the replacement to the gate_error list // later printed to calc error
+                    self.gate_error[index] = self.getIntrinsic(fast_gate, orig_gate[0])
+                    #print(fast_gate, orig_gate[0], self.gate_error[index], "\n")
+                    self.updateFeature(temp, fast_gate)
+                    self.levelToFlat()
+
+                    node_hist.append(orig_gate)
+                    index_hist.append(temp)
+
+                    if(dnn):
+                        self.dnnGetError(self.getNode(orig_gate), fast_gate)
+                    else:
+                        self.calcOutputError()
+
+                    count = count + 1
+                    # if error contraint violated, replace the node with the original and set local error to 0
+                    if (float(self.current_avg_error) > self.error_constraint):
+                        self.calcOutputError()
+                        while (float(self.current_avg_error) > self.error_constraint):
+                            orig_gate = node_hist.pop()
+                            orig_index = index_hist.pop()
+                            index = self.node_by_level[orig_index[0]][orig_index[1]][2]
+                            if (orig_gate[3] in self.nodes_changed):
+                                self.nodes_changed.remove(orig_gate[3])
+                            self.node_by_level[orig_index[0]][orig_index[1]][0] = orig_gate[0]
+                            self.gate_error[index] = "0"
+                            self.calcOutputError()
+                        break
+                # if the node has been changed, change the node back to the original gate
+                else:
+                    self.node_by_level[temp[0]][temp[1]][0] = orig_gate
+            else:
+                self.nodes_changed.append(firstgate[0])
+            # stopping condition // if there is no option for further replacement to make the critical path better
+            if (last_temp == temp):
+                self.calcOutputError()
+                continue_to_area_opt = 1
+                break
+
+
+        # Critical Path Optimization (end) --------------------------------------------------------
+
+
+
+    def approxSynth_(self, dnn):
 
         print("Optmizing Delay...")
         continue_to_area_opt = 0
@@ -856,6 +1067,9 @@ class synthesisEngine(object):
             last_temp = temp
             # cp is the list of the critical path
             cp = self.getCritPath()
+            print("\n")
+            print(cp)
+            print("\n")
             # get the first gate that hasnt been changed on the critical path
             if (cp):
                 firstgate = cp.pop(0)

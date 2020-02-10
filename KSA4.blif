@@ -1,0 +1,32 @@
+# Benchmark "KSA4_new" written by ABC on Fri Feb  7 11:27:21 2020
+.model KSA4_new
+.inputs a0 a1 a2 a3 b0 b1 b2 b3 cin
+.outputs sum0 sum1 sum2 sum3 cout
+.gate xor2a  a=b0 b=a0 O=n15
+.gate xor2a  a=n15 b=cin O=sum0
+.gate xor2a  a=b1 b=a1 O=n17
+.gate and2   a=b0 b=a0 O=n18
+.gate aoi21  a=n15 b=cin c=n18 O=n19
+.gate xnor2a a=n19 b=n17 O=sum1
+.gate xor2a  a=b2 b=a2 O=n21
+.gate and2   a=b1 b=a1 O=n22
+.gate inv1   a=n22 O=n23
+.gate nand2  a=n18 b=n17 O=n24
+.gate nand3  a=n17 b=n15 c=cin O=n25
+.gate nand3  a=n25 b=n24 c=n23 O=n26
+.gate xor2a  a=n26 b=n21 O=sum2
+.gate xor2a  a=b3 b=a3 O=n28
+.gate nand2  a=n21 b=n17 O=n29
+.gate and2   a=b2 b=a2 O=n30
+.gate aoi21  a=n22 b=n21 c=n30 O=n31
+.gate oai21  a=n29 b=n19 c=n31 O=n32
+.gate xor2a  a=n32 b=n28 O=sum3
+.gate inv1   a=n25 O=n34
+.gate and2   a=n28 b=n21 O=n35
+.gate nand2  a=n35 b=n34 O=n36
+.gate nand2  a=n24 b=n23 O=n37
+.gate nand2  a=n35 b=n37 O=n38
+.gate nand2  a=b3 b=a3 O=n39
+.gate nand2  a=n30 b=n28 O=n40
+.gate nand4  a=n40 b=n39 c=n38 d=n36 O=cout
+.end
