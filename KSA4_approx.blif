@@ -1,0 +1,32 @@
+.model  .modelKSA4
+.inputs a0 a1 a2 a3 b0 b1 b2 b3 cin
+.outputs sum0 sum1 sum2 sum3 cout
+.gate nand2  a=b0 b=a0 O=n15
+.gate nand2  a=n15 b=cin O=sum0
+.gate inv1   a=cin O=n17
+.gate nand2  a=n15 b=n17 O=n18
+.gate xor2a  a=b1 b=a1 O=n19
+.gate xor2a  a=n19 b=n18 O=sum1
+.gate inv1   a=n15 O=n21
+.gate nand2  a=n19 b=n21 O=n22
+.gate nand2  a=b1 b=a1 O=n23
+.gate nand3  a=n19 b=n15 c=cin O=n24
+.gate nand3  a=n24 b=n23 c=n22 O=n25
+.gate xor2a  a=b2 b=a2 O=n26
+.gate xor2a  a=n26 b=n25 O=sum2
+.gate nand3  a=n26 b=n19 c=n18 O=n28
+.gate nand2  a=b2 b=a2 O=n29
+.gate nand3  a=n26 b=b1 c=a1 O=n30
+.gate nand3  a=n30 b=n29 c=n28 O=n31
+.gate xor2a  a=b3 b=a3 O=n32
+.gate xor2a  a=n32 b=n31 O=sum3
+.gate and2   a=n32 b=n26 O=n34
+.gate nand2  a=n23 b=n22 O=n35
+.gate nand2  a=n35 b=n34 O=n36
+.gate inv1   a=sum0 O=n37
+.gate nand3  a=n34 b=n19 c=n37 O=n38
+.gate inv1   a=n29 O=n39
+.gate and2   a=b3 b=a3 O=n40
+.gate aoi21  a=n32 b=n39 c=n40 O=n41
+.gate nand3  a=n41 b=n38 c=n36 O=cout
+.end

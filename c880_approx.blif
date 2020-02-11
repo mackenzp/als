@@ -1,0 +1,98 @@
+.model  .modelc880
+.inputs 1 8 13 17 26 29 36 42 51 55 59 68 72 73 74 75 80 85 86 87 88 89 90 \
+ 91 96 101 106 111 116 121 126 130 135 138 143 146 149 152 153 156 159 165 171 177 183 189 \
+ 195 201 207 210 219 228 237 246 255 259 260 261 267 268
+.outputs 388 389 390 391 418 419 420 421 422 423 446 447 448 449 450 767 768 850 863 864 865 866 874 \
+ 878 879 880
+.gate nand3  a=75 b=42 c=29 O=n87
+.gate inv1   a=n87 O=388
+.gate nand3  a=80 b=36 c=29 O=n89
+.gate inv1   a=n89 O=389
+.gate nand3  a=42 b=36 c=29 O=n91
+.gate inv1   a=n91 O=390
+.gate and2   a=86 b=85 O=391
+.gate nand4  a=26 b=17 c=13 d=1 O=n95
+.gate inv1   a=n95 O=n96
+.gate nand2  a=n96 b=n91 O=419
+.gate nand3  a=80 b=75 c=59 O=420
+.gate nand3  a=80 b=59 c=36 O=421
+.gate nand3  a=59 b=42 c=36 O=422
+.gate inv1   a=87 O=n101
+.gate inv1   a=88 O=n102
+.gate inv1   a=90 O=n103
+.gate aoi21  a=n102 b=n101 c=n103 O=423
+.gate nand2  a=n96 b=390 O=446
+.gate inv1   a=89 O=n109
+.gate aoi21  a=n102 b=n101 c=n109 O=450
+.gate xor2a  a=126 b=121 O=n111
+.gate xor2a  a=116 b=111 O=n112
+.gate xor2a  a=n112 b=n111 O=n113
+.gate xor2a  a=n113 b=135 O=n114
+.gate xor2a  a=106 b=101 O=n115
+.gate xor2a  a=96 b=91 O=n116
+.gate xor2a  a=n116 b=n115 O=n117
+.gate xor2a  a=n117 b=130 O=n118
+.gate xor2a  a=n118 b=n114 O=767
+.gate xor2a  a=201 b=195 O=n120
+.gate xor2a  a=189 b=183 O=n121
+.gate xor2a  a=n121 b=n120 O=n122
+.gate xor2a  a=n122 b=207 O=n123
+.gate xor2a  a=177 b=171 O=n124
+.gate xor2a  a=165 b=159 O=n125
+.gate xor2a  a=n125 b=n124 O=n126
+.gate xor2a  a=n126 b=130 O=n127
+.gate xor2a  a=n127 b=n123 O=768
+.gate nand2  a=261 b=219 O=n129
+.gate aoi22  a=267 b=255 c=210 d=121 O=n130
+.gate nand2  a=n130 b=n129 O=850
+.gate nand2  a=210 b=106 O=n132
+.gate nor2   a=228 b=219 O=n133
+.gate nand2  a=n133 b=n132 O=863
+.gate nand2  a=210 b=111 O=n135
+.gate nand2  a=259 b=255 O=n136
+.gate nand2  a=n136 b=n135 O=864
+.gate nand2  a=210 b=116 O=n138
+.gate nand2  a=260 b=255 O=n139
+.gate nand2  a=n139 b=n138 O=865
+.gate inv1   a=91 O=n141
+.gate inv1   a=143 O=n142
+.gate inv1   a=159 O=n143
+.gate nand2  a=138 b=8 O=n144
+.gate nand4  a=n144 b=n143 c=n142 d=n141 O=n145
+.gate inv1   a=165 O=n146
+.gate inv1   a=171 O=n147
+.gate inv1   a=177 O=n148
+.gate nand3  a=n148 b=n147 c=n146 O=n149
+.gate nand2  a=n149 b=n145 O=n150
+.gate nand3  a=n144 b=n142 c=n141 O=n151
+.gate nand2  a=n151 b=159 O=n152
+.gate nand2  a=n152 b=n150 O=866
+.gate nand2  a=210 b=101 O=n154
+.gate nor2   a=246 b=237 O=n155
+.gate nand2  a=n155 b=n154 O=874
+.gate xor2a  a=n151 b=159 O=n157
+.gate nand2  a=n157 b=n149 O=n158
+.gate nand2  a=n152 b=n145 O=n159
+.gate nand4  a=n159 b=n148 c=n147 d=n146 O=n160
+.gate nand3  a=n160 b=n158 c=219 O=n161
+.gate nand2  a=n151 b=246 O=n162
+.gate nand3  a=n151 b=237 c=159 O=n163
+.gate nand2  a=268 b=210 O=n164
+.gate nand3  a=n164 b=n163 c=n162 O=n165
+.gate aoi21  a=n157 b=228 c=n165 O=n166
+.gate nand2  a=n166 b=n161 O=878
+.gate aoi21  a=237 b=165 c=246 O=n168
+.gate nand2  a=219 b=165 O=n169
+.gate nand2  a=210 b=91 O=n170
+.gate nand2  a=228 b=n146 O=n171
+.gate nand4  a=n171 b=n170 c=n169 d=n168 O=879
+.gate aoi21  a=237 b=171 c=246 O=n173
+.gate nand2  a=219 b=171 O=n174
+.gate nand2  a=210 b=96 O=n175
+.gate nand2  a=228 b=n147 O=n176
+.gate nand4  a=n176 b=n175 c=n174 d=n173 O=880
+.gate zero   O=418
+.gate one    O=447
+.gate zero   O=448
+.gate zero   O=449
+.end
