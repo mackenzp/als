@@ -827,8 +827,17 @@ class synthesisEngine(object):
             # previous change // used for stopping condition
             last_temp = temp
             # cp is the list of the critical path
+            # power - alter list of replacement nodes
             #cp = self.getCritPath()
             cp = self.getCritPowerNodes()
+            cp_new = []
+            for item in cp:
+                temp_list = [item, 0]
+                cp_new.append(temp_list)
+            cp = cp_new
+            #print(cp)
+            #exit(0)
+
             # get the first gate that hasnt been changed on the critical path
             if(cp):
                 firstgate = cp.pop(-1)
@@ -901,9 +910,14 @@ class synthesisEngine(object):
             # cp is the list of the critical path
             #cp = self.getCritPath()
             cp = self.getCritPowerNodes()
-            print("\n")
-            print(cp)
-            print("\n")
+            cp_new = []
+            for item in cp:
+                temp_list = [item, 0]
+                cp_new.append(temp_list)
+            cp = cp_new
+            # print(cp)
+            # exit(0)
+
             # get the first gate that hasnt been changed on the critical path
             if (cp):
                 firstgate = cp.pop(0)
