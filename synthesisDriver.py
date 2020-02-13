@@ -7,9 +7,13 @@
 import os
 from synthesisEngine import synthesisEngine
 
+# set tech library
+lib = "45nm.genlib"
+#lib = "mcnc.genlib"
+
 def writeRuntxt(command):
     file = open("run.txt", "w")
-    file.write("read_library mcnc.genlib")
+    file.write("read_library " + lib)
     file.write("\n")
     file.write("read ")
     file.write(command)

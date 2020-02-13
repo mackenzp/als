@@ -1,4 +1,4 @@
 ABC command line: "source run.txt".
 
-Entered genlib library with 24 gates from file "mcnc.genlib".
+Entered genlib library with 18 gates from file "techlib.genlib".
 Warning: The network was strashed and balanced before mapping.

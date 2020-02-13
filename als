@@ -39,7 +39,7 @@ def getCommand():
 # ------------------------------------------------------------------------------------------
 def writeRuntxt(command):
     file = open("run.txt", "w")
-    file.write("read_library mcnc.genlib")
+    file.write("read_library techlib.genlib")
     file.write("\n")
     file.write("read ")
     file.write(command)
@@ -78,6 +78,7 @@ def printHelp():
     print("\tSynthesize Command(s):")
     print("\t map_approx    <file_path (.blif or .bench)>   <error constraint (0 - 1.0)>")
     print("\t map_exact     <file_path (.blif or .bench)>")
+    print("\t read_library  <library name (.genlib)>")
     print("\n")
     print("\tWrite Command(s):")
     print("\t write_blif    <filename (.blif)>")
@@ -299,6 +300,28 @@ def trainDNN():
     else:
         return
 
+def setLib(command):
+    # ensure the argument is valid
+    command_list = command.split(" ")
+    if(len(command_list)!=2):
+        print("ERROR: read_library should have one argument\n")
+        return
+    for item in command_list:
+        if("read_library" in item):
+            command_list.remove(item)
+    command = command_list[0]
+    if ("45nm.genlib" not in command and "mcnc.genlib" not in command):
+        print("ERROR: invalid filetype for set_lib. Options include \"45nm.genlib\" or \"mcnc.genlib\"""\n")
+        return
+    if ("45nm.genlib" in command):
+        print("Setting technology library to 45nm.genlib...\n")
+        command = "cp 45nm.genlib techlib.genlib"
+        os.system(command)
+    if ("mcnc.genlib" in command):
+        print("Setting technology library to mcnc.genlib...\n")
+        command = "cp mcnc.genlib techlib.genlib"
+        os.system(command)
+
 # handles and distributes the commands from the user to their respective functions -----------
 def commandHandler(command):
     exit_list = ["quit", "exit", "q"]
@@ -316,6 +339,8 @@ def commandHandler(command):
         printError()
     elif ("train_dnn" in command):
         trainDNN()
+    elif ("read_library" in command):
+        setLib(command)
     elif (command not in exit_list):
         print("Command not recognized, type \"help\" for a list of commands\n")
 

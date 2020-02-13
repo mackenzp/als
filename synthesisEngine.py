@@ -133,8 +133,7 @@ class synthesisEngine(object):
 
     # -- load the contents of the technology library ---------------------------
     def loadLibraryStats(self):
-        library = [line.rstrip("\n") for line in open("mcnc.genlib")]
-        #library = [line.rstrip("\n") for line in open("45nm.genlib")]
+        library = [line.rstrip("\n") for line in open("techlib.genlib")]
         lib_list = []
         for item in library:
             temp_list = item.replace("\t", " ").split(" ")
@@ -164,7 +163,7 @@ class synthesisEngine(object):
                            "nor2": "1000", "nor3": "10000000", "nor4": "1000000000000000", \
                            "and2": "0001", "or2": "0111", "xor2a": "0110", "xor2b": "0110", \
                            "xnor2a": "1001", "xnor2b": "1001", "aoi21": "10101000", "aoi22": "1110111011100000", \
-                           "oai21": "11101010", "oai22": "1111100010001000", "BUF1": "01", "DFF": "01", \
+                           "oai21": "11101010", "oai22": "1111100010001000", "BUF1": "01", "DFF": "01", "DFFPOSX1": "01", \
                            "zero": "0", "one": "1"}
 
         self.numInputs = {"inv1": "1", "inv2": "1", "inv3": "1", "inv4": "1", \
@@ -172,7 +171,7 @@ class synthesisEngine(object):
                           "nor2": "2", "nor3": "3", "nor4": "4", \
                           "and2": "2", "or2": "2", "xor2a": "2", "xor2b": "2", \
                           "xnor2a": "2", "xnor2b": "2", "aoi21": "3", "aoi22": "4", \
-                          "oai21": "3", "oai22": "4", "BUF1": "1", \
+                          "oai21": "3", "oai22": "4", "BUF1": "1", "DFFPOSX1": "1", \
                           "zero": "0", "one": "0"}
 
     def reset(self):
@@ -828,6 +827,7 @@ class synthesisEngine(object):
             last_temp = temp
             # cp is the list of the critical path
             # power - alter list of replacement nodes
+            # organize list of crit power nodes as list of [[a b], [c d], ...]
             #cp = self.getCritPath()
             cp = self.getCritPowerNodes()
             cp_new = []
@@ -909,14 +909,14 @@ class synthesisEngine(object):
             last_temp = temp
             # cp is the list of the critical path
             #cp = self.getCritPath()
+
             cp = self.getCritPowerNodes()
+            # organize list of crit power nodes as list of [[a b], [c d], ...]
             cp_new = []
             for item in cp:
                 temp_list = [item, 0]
                 cp_new.append(temp_list)
             cp = cp_new
-            # print(cp)
-            # exit(0)
 
             # get the first gate that hasnt been changed on the critical path
             if (cp):
