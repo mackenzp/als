@@ -24,12 +24,14 @@ logging.getLogger('tensorflow').setLevel(logging.ERROR)
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'  # or any {'0', '1', '2'}
 from keras.models import Sequential
 from keras.models import load_model
-#==============some utility functions:
+from Utils import writeBlif
+#=======================================some utility functions:
 def Generate_Switching_File():
     with open("run_sw.txt", "w") as fp:
         fp.write("r mcnc.genlib; r original.blif; printSwitching; q;\n")
     command = "./abc -f run_sw.txt > abc_sw.log"
     os.system(command)
+
 def Sort_Switchings():
     sw_val = []
     sw = []
@@ -41,21 +43,22 @@ def Sort_Switchings():
             tmp = line.split(" ")
             a_line = []
             a_line.append(tmp[0])
-            a_line.append(float(tmp[1]))
+            a_line.append(float(tmp[1])*2.16)
             tot.append(a_line)
-            sw_val.append(float(tmp[1]))
+            sw_val.append(float(tmp[1])*2.16)
             size += 1
     # sort in descending order to have nodes with higher switching at lower indices
     sw_val.sort(reverse=True)
+    sw_val_ret = []
     #print(sw_val)
     for idx in range(size):
         for i in range(size):
             if(tot[i][1] == sw_val[idx]):
                 sw.append(tot[i][0])
+                sw_val_ret.append(tot[i][1])
                 break
-    #print(sw)
         
-    return sw
+    return sw, sw_val_ret
             
 
 # class container for network approximation ------------------------------------------------
@@ -105,6 +108,8 @@ class synthesisEngine(object):
         self.nodes_changed = []
         self.crit_output = ""
         self.crit_path = []
+        self.crit_power_net = []
+        self.crit_power_val = []
         self.truthTable = {}
         self.numInputs = {}
 
@@ -199,7 +204,8 @@ class synthesisEngine(object):
         self.nodes_changed = []
         self.crit_output = ""
         self.crit_path = []
-        self.crit_power = []
+        self.crit_power_net = []
+        self.crit_power_val = []
         self.truthTable = {}
         self.numInputs = {}
 
@@ -512,6 +518,36 @@ class synthesisEngine(object):
             self.current_area = total_area
         return total_area
 
+    def calcTotalPower(self):
+        total_power = 0.0
+        #first write the current network into a temp file:
+        writeBlif("write_blif temp_power.blif", 0)
+        #now, generate the script file for abc:
+        with open("run_power.txt", "w") as fp:
+            fp.write("r techlib.genlib; r temp_power.blif; ps -p; q;\n")
+        command = "./abc -f run_power.txt > abc_power.log"
+        os.system(command)
+        # extrcat the total switching power from the log file
+        power_extracted = 0
+        '''
+        with open("abc_power.log", "r") as fp:
+            for line in fp:
+                #print(line)
+                if "power" in line:
+                    line = line.rstrip()
+                    temp = line.split(" ")
+                    power_extracted = 1
+                    break
+        '''
+        with open("power_log.txt", "r") as fp:
+            for line in fp:
+                line = line.rstrip()
+
+        total_power = float(line)
+        total_power *= 2.16 # to convert it to uW
+ 
+        return total_power
+
 
     def getAvgError(self):
         self.calcOutputError()
@@ -561,7 +597,7 @@ class synthesisEngine(object):
         self.calcDelay(1)
         self.crit_path = []
         gate = self.crit_output
-        print(gate)
+        #print(gate)
         while(self.curr_delay_dict[gate]):
             max = -1
             name_delay = []
@@ -581,8 +617,8 @@ class synthesisEngine(object):
     def getCritPowerNodes(self):
         #run ABC for exatrcating switching activitiesL
         Generate_Switching_File()
-        self.crit_power = Sort_Switchings()
-        return self.crit_power
+        self.crit_power_net, self.crit_power_val = Sort_Switchings()
+        return self.crit_power_net, self.crit_power_val  
 
 
     def printCritPath(self):
@@ -591,6 +627,19 @@ class synthesisEngine(object):
         print("-------------------")
         for item in self.crit_path:
             print('{:<6}{:<3}{:>6}'.format(item[0], " | ", item[1]))
+        print("-------------------")
+
+
+    def printCritPowerNodes(self):
+        print("\nCritical Power nodes: ----")
+        print('{:<7}{:<3}{:>7}'.format("Node: ", "| ", "Delay(ns)"))
+        print("-------------------")
+        net, val = self.getCritPowerNodes()
+        size = len(net)
+        if(size > 20):
+            size = 20 # print up to 20 critical nodes not more!
+        for idx in range(size):
+            print('{:<6}{:<3}{:>6}'.format(net[idx], " | ", val[idx]))
         print("-------------------")
 
 
@@ -777,6 +826,19 @@ class synthesisEngine(object):
         else:
             print("This library only has 4 inputs")
 
+    def powerEfficientGate(self, gate): # gate with less output capacitance
+        num_inputs = self.numInputs[gate]
+        if(num_inputs == "1"):
+            return ("inv1")
+        elif(num_inputs == "2"):
+            return ("nand2")
+        elif(num_inputs == "3"):
+            return ("nand3")
+        elif(num_inputs == "4"):
+            return ("nand4")
+        else:
+            print("This library only has 4 inputs")
+
 
     def optArea(self, gate):
         num_inputs = self.numInputs[gate[0]]
@@ -806,9 +868,9 @@ class synthesisEngine(object):
 
 
 
-    def approxSynth(self, dnn):
+    def approxPower(self, dnn):
 
-        print("Optmizing Delay...")
+        print("Optmizing Power...")
         continue_to_area_opt = 0
 
         # Critical Path Optimization (begin) -------------------------------------------------------
@@ -817,19 +879,20 @@ class synthesisEngine(object):
 
         node_hist = []
         index_hist = []
-
+       
         while(1):
             if(float(self.calcArea(1))/self.init_area <= self.area_thresh):
                 break
             # prints the loading bar
-            sys.stdout.write("\r" + "Trying: " + str(count) + " | " + "Critical Delay: " + str(self.current_delay) + "     ")
+            #print(self.calcTotalPower())
+            sys.stdout.write("\r" + "Trying: " + str(count) )
             # previous change // used for stopping condition
             last_temp = temp
             # cp is the list of the critical path
             # power - alter list of replacement nodes
             # organize list of crit power nodes as list of [[a b], [c d], ...]
             #cp = self.getCritPath()
-            cp = self.getCritPowerNodes()
+            cp, _ = self.getCritPowerNodes()
             cp_new = []
             for item in cp:
                 temp_list = [item, 0]
@@ -851,26 +914,26 @@ class synthesisEngine(object):
             # make a copy of the gate in case the error constraint is violated
             orig_gate = copy.deepcopy(self.node_by_level[temp[0]][temp[1]])
             # replace the gate in the network with the fastest gate
-            fast_gate = self.fastestNode(orig_gate[0])
+            efficient_gate = self.powerEfficientGate(orig_gate[0])
 
 
-            if (fast_gate != orig_gate[0]):
+            if (efficient_gate != orig_gate[0]):
 
-                self.node_by_level[temp[0]][temp[1]][0] = fast_gate
+                self.node_by_level[temp[0]][temp[1]][0] = efficient_gate
                 # if the gate has not been changed
                 if(firstgate[0] not in self.nodes_changed):
                     # note the gate has been changed
                     self.nodes_changed.append(firstgate[0])
                     index = self.node_by_level[temp[0]][temp[1]][2]
                     # add the error of the replacement to the gate_error list // later printed to calc error
-                    self.gate_error[index] = self.getIntrinsic(fast_gate, orig_gate[0])
-                    self.updateFeature(temp, fast_gate)
+                    self.gate_error[index] = self.getIntrinsic(efficient_gate, orig_gate[0])
+                    self.updateFeature(temp, efficient_gate)
 
                     node_hist.append(orig_gate)
                     index_hist.append(temp)
 
                     if (dnn):
-                        self.dnnGetError(self.getNode(orig_gate), fast_gate)
+                        self.dnnGetError(self.getNode(orig_gate), efficient_gate)
                     else:
                         self.calcOutputError()
                     count = count + 1
@@ -904,13 +967,13 @@ class synthesisEngine(object):
             if(float(self.calcArea(1))/self.init_area <= self.area_thresh):
                 break
             # prints the loading bar
-            sys.stdout.write("\r" + "Trying: " + str(count) + " | " + "Critical Delay: " + str(self.current_delay) + "     ")
+            sys.stdout.write("\r" + "Trying: " + str(count) )
             # previous change // used for stopping condition
             last_temp = temp
             # cp is the list of the critical path
             #cp = self.getCritPath()
 
-            cp = self.getCritPowerNodes()
+            cp, _ = self.getCritPowerNodes()
             # organize list of crit power nodes as list of [[a b], [c d], ...]
             cp_new = []
             for item in cp:
@@ -933,29 +996,29 @@ class synthesisEngine(object):
             orig_gate = copy.deepcopy(self.node_by_level[temp[0]][temp[1]])
             # replace the gate in the network with the fastest gate
             if (self.getIntrinsic("one", orig_gate[0]) <= self.getIntrinsic("zero", orig_gate[0])):
-                fast_gate = "one"
+                efficient_gate = "one"
             else:
-                fast_gate = "zero"
+                efficient_gate = "zero"
 
-            if (fast_gate != orig_gate[0]):
+            if (efficient_gate != orig_gate[0]):
 
-                self.node_by_level[temp[0]][temp[1]][0] = fast_gate
+                self.node_by_level[temp[0]][temp[1]][0] = efficient_gate
                 # if the gate has not been changed
                 if (firstgate[0] is not "one" and firstgate is not "zero"):
                     # note the gate has been changed
                     #self.nodes_changed.append(firstgate[0])
                     index = self.node_by_level[temp[0]][temp[1]][2]
                     # add the error of the replacement to the gate_error list // later printed to calc error
-                    self.gate_error[index] = self.getIntrinsic(fast_gate, orig_gate[0])
-                    #print(fast_gate, orig_gate[0], self.gate_error[index], "\n")
-                    self.updateFeature(temp, fast_gate)
+                    self.gate_error[index] = self.getIntrinsic(efficient_gate, orig_gate[0])
+                    #print(efficient_gate, orig_gate[0], self.gate_error[index], "\n")
+                    self.updateFeature(temp, efficient_gate)
                     self.levelToFlat()
 
                     node_hist.append(orig_gate)
                     index_hist.append(temp)
 
                     if(dnn):
-                        self.dnnGetError(self.getNode(orig_gate), fast_gate)
+                        self.dnnGetError(self.getNode(orig_gate), efficient_gate)
                     else:
                         self.calcOutputError()
 
@@ -987,9 +1050,7 @@ class synthesisEngine(object):
 
         # Critical Path Optimization (end) --------------------------------------------------------
 
-
-
-    def approxSynth_(self, dnn):
+    def approxDelay(self, dnn):
 
         print("Optmizing Delay...")
         continue_to_area_opt = 0
@@ -1081,9 +1142,9 @@ class synthesisEngine(object):
             last_temp = temp
             # cp is the list of the critical path
             cp = self.getCritPath()
-            print("\n")
-            print(cp)
-            print("\n")
+            #print("\n")
+            #print(cp)
+            #print("\n")
             # get the first gate that hasnt been changed on the critical path
             if (cp):
                 firstgate = cp.pop(0)
