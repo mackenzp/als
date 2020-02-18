@@ -1,0 +1,1 @@
+r techlib.genlib; r temp_power.blif; ps -p; q;

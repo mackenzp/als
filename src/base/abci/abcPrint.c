@@ -193,6 +193,9 @@ float Abc_NtkMfsTotalSwitching( Abc_Ntk_t * pNtk )
     Vec_IntFree( vSwitching );
     Aig_ManStop( pAig );
     Abc_NtkDelete( pNtkStr );
+    FILE* fp = fopen("power_log.txt", "w");
+    fprintf(fp, "%5.4f", Result);
+    fclose(fp);
     return Result;
 }
 
