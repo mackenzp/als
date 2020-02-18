@@ -147,9 +147,9 @@ def mapApprox(command, power):
             print("Initial Critical Delay:    | ", init_delay)
         print("Initial Area:              | ", init_area)
         print("----------------------------------")
-        #print("PreMap Critical Delay:  | ", repl_delay)
-        #print("PreMap Area:            | ", repl_area)
-        #print("----------------------------------")
+        print("PreMap Critical Delay:     | ", repl_delay)
+        print("PreMap Area:               | ", repl_area)
+        print("----------------------------------")
         if(power):
             print("Final switching power:     | ", total_power)
         else:

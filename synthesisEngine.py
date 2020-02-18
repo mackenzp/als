@@ -583,6 +583,7 @@ class synthesisEngine(object):
                                 max_of_gate_inputs = self.curr_delay_dict[gate_input]
                     # round to tenths place
                     self.curr_delay_dict[gate[3]] = round(max_of_gate_inputs + float(self.lib_dict[gate[0]]['delay']), 1)
+
                 else:
                     self.curr_delay_dict[gate[3]] = 0.0
                 if (self.curr_delay_dict[gate[3]] > max_of_network):
@@ -597,7 +598,6 @@ class synthesisEngine(object):
         self.calcDelay(1)
         self.crit_path = []
         gate = self.crit_output
-        #print(gate)
         while(self.curr_delay_dict[gate]):
             max = -1
             name_delay = []
@@ -812,17 +812,68 @@ class synthesisEngine(object):
                 error = count / len(self.truthTable[gate1])
                 return error
 
+    def smallestNode(self, gate):
+
+        num_inputs = self.numInputs[gate]
+        min_gate = ''
+        if(num_inputs == "1"):
+            for gate_type in self.lib_dict:
+                if (self.numInputs[gate_type] == '1'):
+                    if (min_gate == '' or float(self.lib_dict[gate_type]['area']) < float(self.lib_dict[min_gate]['area'])):
+                        min_gate = gate_type
+            return (min_gate)
+        elif(num_inputs == "2"):
+            for gate_type in self.lib_dict:
+                if (self.numInputs[gate_type] == '2'):
+                    if (min_gate == '' or float(self.lib_dict[gate_type]['area']) < float(self.lib_dict[min_gate]['area'])):
+                        min_gate = gate_type
+            return (min_gate)
+        elif(num_inputs == "3"):
+            for gate_type in self.lib_dict:
+                if (self.numInputs[gate_type] == '3'):
+                    if (min_gate == '' or float(self.lib_dict[gate_type]['area']) < float(self.lib_dict[min_gate]['area'])):
+                        min_gate = gate_type
+            return (min_gate)
+        elif(num_inputs == "4"):
+            for gate_type in self.lib_dict:
+                if (self.numInputs[gate_type] == '4'):
+                    if (min_gate == '' or float(self.lib_dict[gate_type]['area']) < float(self.lib_dict[min_gate]['area'])):
+                        min_gate = gate_type
+            return (min_gate)
+        else:
+            print("This library only has 4 inputs")
+
+
+
 
     def fastestNode(self, gate):
+
         num_inputs = self.numInputs[gate]
+        min_gate = ''
         if(num_inputs == "1"):
-            return ("inv1")
+            for gate_type in self.lib_dict:
+                if (self.numInputs[gate_type] == '1'):
+                    if (min_gate == '' or float(self.lib_dict[gate_type]['delay']) < float(self.lib_dict[min_gate]['delay'])):
+                        min_gate = gate_type
+            return (min_gate)
         elif(num_inputs == "2"):
-            return ("nand2")
+            for gate_type in self.lib_dict:
+                if (self.numInputs[gate_type] == '2'):
+                    if (min_gate == '' or float(self.lib_dict[gate_type]['delay']) < float(self.lib_dict[min_gate]['delay'])):
+                        min_gate = gate_type
+            return (min_gate)
         elif(num_inputs == "3"):
-            return ("nand3")
+            for gate_type in self.lib_dict:
+                if (self.numInputs[gate_type] == '3'):
+                    if (min_gate == '' or float(self.lib_dict[gate_type]['delay']) < float(self.lib_dict[min_gate]['delay'])):
+                        min_gate = gate_type
+            return (min_gate)
         elif(num_inputs == "4"):
-            return ("nand4")
+            for gate_type in self.lib_dict:
+                if (self.numInputs[gate_type] == '4'):
+                    if (min_gate == '' or float(self.lib_dict[gate_type]['delay']) < float(self.lib_dict[min_gate]['delay'])):
+                        min_gate = gate_type
+            return (min_gate)
         else:
             print("This library only has 4 inputs")
 
@@ -1236,7 +1287,7 @@ class synthesisEngine(object):
                     gate = self.node_by_level[level][i]
                     if (gate[3] not in self.nodes_changed and gate[0] != "one" and gate[0] != "zero"):
                         orig_gate = copy.deepcopy(gate)
-                        faster_gate = self.fastestNode(orig_gate[0])
+                        faster_gate = self.smallestNode(orig_gate[0])
                         #faster_gate = self.optArea(orig_gate)
                         if (orig_gate[0] != faster_gate):
                             self.node_by_level[level][i][0] = faster_gate
