@@ -4,9 +4,13 @@
 # Description:  This file acts as the user control for DNN training, approximate synthesis,
 #               exact synthesis, and file I/O.
 
+#MH: Modified to allow sys.argv Feb 18 2020 
+
+import sys
 import os
 import copy
 import time
+
 from synthesisEngine import synthesisEngine
 from Utils import printInit, initFiles, getCommand, writeRuntxt, runABC, checkABCError, is_float, printHelp, writeBlif, printError, trainDNN, setLib
 
@@ -65,6 +69,7 @@ def mapApprox(command, power):
         return
     writeRuntxt(command)
     map_start = time.time()
+#    print("\n calling runABC()")
     runABC()
     map_end = time.time()
 
@@ -234,15 +239,20 @@ def commandHandler(command):
 
 # ------------------------------------------------------------------------------------------
 def main():
-    printInit()
-    initFiles()
-    command = ""
-    exit_list = ["quit", "exit", "q"]
-    while(command not in exit_list):
-        command = getCommand()
+    initFiles()  
+    if len(sys.argv) == 1:
+     printInit()
+     command = ""
+     exit_list = ["quit", "exit", "q"]
+     while(command not in exit_list):
+      command = getCommand()
+      commandHandler(command)
+    else: 
+     command = ""
+     exit_list = ["quit", "exit", "q"]
+     while(command not in exit_list):
+        command = sys.argv[1]
+        sys.argv[1] ="quit" 
         commandHandler(command)
-    
-
-
 if __name__ == "__main__":
     main()
