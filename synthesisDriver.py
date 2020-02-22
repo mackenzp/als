@@ -8,8 +8,11 @@ import os
 from synthesisEngine import synthesisEngine
 
 # set tech library
-lib = "45nm.genlib"
-#lib = "mcnc.genlib"
+#lib = "45nm.genlib"
+lib = "mcnc.genlib"
+
+cp_command = "cp " + lib + " techlib.genlib"
+os.system(cp_command)
 
 def writeRuntxt(command):
     file = open("run.txt", "w")
@@ -32,7 +35,8 @@ def runABC():
 
 
 # test driver program to test the synthesisEngine class on a network
-command = "benchfolder/ISCAS85/c880.bench"
+#command = "benchfolder/ISCAS85/c880.bench"
+command = "benchfolder/EPFL/random_control/ctrl.blif"
 writeRuntxt(command)
 runABC()
 command = "python3 blif_to_custom_bench.py > original.bench"
@@ -48,6 +52,8 @@ network.loadLibraryStats()
 network.loadNetwork()
 network.printGates()
 network.printStatus()
-network.approxDelay(dnn=True)
+#network.approxDelay(dnn=True)
+network.calcTotalPower()
+network.approxPower(dnn=True)
 network.areaClean(dnn=True)
 network.printStatus()

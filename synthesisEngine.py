@@ -28,7 +28,7 @@ from Utils import writeBlif
 #=======================================some utility functions:
 def Generate_Switching_File():
     with open("run_sw.txt", "w") as fp:
-        fp.write("r mcnc.genlib; r original.blif; printSwitching; q;\n")
+        fp.write("r techlib.genlib; r original.blif; printSwitching; q;\n")
     command = "./abc -f run_sw.txt > abc_sw.log"
     os.system(command)
 
@@ -38,6 +38,7 @@ def Sort_Switchings():
     size = 0
     tot = []
     a_line = []
+    os.system("sed -i '$d' nodes_switching.txt")
     with open("nodes_switching.txt", "r") as fp:
         for line in fp:
             tmp = line.split(" ")
@@ -178,6 +179,7 @@ class synthesisEngine(object):
                           "xnor2a": "2", "xnor2b": "2", "aoi21": "3", "aoi22": "4", \
                           "oai21": "3", "oai22": "4", "BUF1": "1", "DFFPOSX1": "1", \
                           "zero": "0", "one": "0"}
+
 
     def reset(self):
         # techlib specific features
@@ -560,6 +562,7 @@ class synthesisEngine(object):
     def printGates(self):
         self.calcArea(1)
         print("\nNetwork Gates: --------------------------")
+        print(self.lib_dict)
         for i in self.curr_gate_dict:
             percent_error = str(round((100*self.curr_gate_dict[i]*float(self.lib_dict[i]['area']))/self.current_area,1))
             print('{:<6}{:<3}{:>11}{:>4}{:>4}{:>7}{:>6}'.format(i, " | ", "Instance =", self.curr_gate_dict[i] \
@@ -877,16 +880,34 @@ class synthesisEngine(object):
         else:
             print("This library only has 4 inputs")
 
+    # FIXME !!! currently getting fastest gate
     def powerEfficientGate(self, gate): # gate with less output capacitance
         num_inputs = self.numInputs[gate]
+        min_gate = ''
         if(num_inputs == "1"):
-            return ("inv1")
+            for gate_type in self.lib_dict:
+                if (self.numInputs[gate_type] == '1'):
+                    if (min_gate == '' or float(self.lib_dict[gate_type]['delay']) < float(self.lib_dict[min_gate]['delay'])):
+                        min_gate = gate_type
+            return (min_gate)
         elif(num_inputs == "2"):
-            return ("nand2")
+            for gate_type in self.lib_dict:
+                if (self.numInputs[gate_type] == '2'):
+                    if (min_gate == '' or float(self.lib_dict[gate_type]['delay']) < float(self.lib_dict[min_gate]['delay'])):
+                        min_gate = gate_type
+            return (min_gate)
         elif(num_inputs == "3"):
-            return ("nand3")
+            for gate_type in self.lib_dict:
+                if (self.numInputs[gate_type] == '3'):
+                    if (min_gate == '' or float(self.lib_dict[gate_type]['delay']) < float(self.lib_dict[min_gate]['delay'])):
+                        min_gate = gate_type
+            return (min_gate)
         elif(num_inputs == "4"):
-            return ("nand4")
+            for gate_type in self.lib_dict:
+                if (self.numInputs[gate_type] == '4'):
+                    if (min_gate == '' or float(self.lib_dict[gate_type]['delay']) < float(self.lib_dict[min_gate]['delay'])):
+                        min_gate = gate_type
+            return (min_gate)
         else:
             print("This library only has 4 inputs")
 
@@ -949,8 +970,6 @@ class synthesisEngine(object):
                 temp_list = [item, 0]
                 cp_new.append(temp_list)
             cp = cp_new
-            #print(cp)
-            #exit(0)
 
             # get the first gate that hasnt been changed on the critical path
             if(cp):
