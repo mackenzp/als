@@ -562,7 +562,6 @@ class synthesisEngine(object):
     def printGates(self):
         self.calcArea(1)
         print("\nNetwork Gates: --------------------------")
-        print(self.lib_dict)
         for i in self.curr_gate_dict:
             percent_error = str(round((100*self.curr_gate_dict[i]*float(self.lib_dict[i]['area']))/self.current_area,1))
             print('{:<6}{:<3}{:>11}{:>4}{:>4}{:>7}{:>6}'.format(i, " | ", "Instance =", self.curr_gate_dict[i] \
