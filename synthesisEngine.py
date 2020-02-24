@@ -42,6 +42,10 @@ def Sort_Switchings():
         for line in fp:
             tmp = line.split(" ")
             a_line = []
+            tmp[0] = tmp[0].rstrip()
+            tmp[0] = tmp[0].lstrip()
+            tmp[1] = tmp[1].rstrip()
+            tmp[1] = tmp[1].lstrip()
             a_line.append(tmp[0])
             a_line.append(float(tmp[1])*2.16)
             tot.append(a_line)
@@ -631,8 +635,8 @@ class synthesisEngine(object):
 
 
     def printCritPowerNodes(self):
-        print("\nCritical Power nodes: ----")
-        print('{:<7}{:<3}{:>7}'.format("Node: ", "| ", "Delay(ns)"))
+        print("\nCritical Power nodes (showing up to 20 nodes): ----")
+        print('{:<7}{:<3}{:>7}'.format("Node: ", "| ", "Power(uW)"))
         print("-------------------")
         net, val = self.getCritPowerNodes()
         size = len(net)
