@@ -1,7 +1,6 @@
-# ALS: Approximate Logic Synthesis
+# Deep-PowerX: A Deep Learning-Based Framework for Low-Power Approximate Logic Synthesis
 
-An Approximate Logic Synthesis Tool combining technology mapping techniques (from Berkeley's ABC synthesis tool) and a
-Deep Neural Network (trained based on boolean difference calculus) to predict the future output error of a network with an incremental logic gate approximation.
+Deep learning, approximate computing, and low-power design are three popular topics in these days which meet at the synthesis level in this paper. This is due to proven high impact of logic synthesis in reducing the total power consumption in digital circuits. We have used advances in deep learning in order to guide a synthesis engine to minimize the total switching power (as the main source of power consumption in CMOS circuits) for any given digital circuit subject to a predetermined error rate at the primary outputs. Our framework which is called Deep-PowerX focuses on replacing or removing gates on a post technology mapped network and uses a Deep Neural Network (DNN) to predict error rate at primary outputs when a specific part of the netlist is approximated, thus eliminating the need to go through the whole synthesis flow to check final error-rate. This reduces the run-time considerably compared to the actual calculations, which maybe required to verify the error-rate at the circuit outputs.
 
 ## Installation
 - Make sure that you are using python3.6 or newer (written using python 3.6.7)
