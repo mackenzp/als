@@ -62,8 +62,12 @@ def Sort_Switchings():
                 sw.append(tot[i][0])
                 sw_val_ret.append(tot[i][1])
                 break
-        
-    return sw, sw_val_ret
+    
+    # consider only up to 100 cirtical nodes:
+    if(len(sw) > 100):
+        return sw[0:99], sw_val_ret[0:99]
+    else:    
+        return sw, sw_val_ret
             
 
 # class container for network approximation ------------------------------------------------
