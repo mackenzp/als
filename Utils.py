@@ -34,9 +34,25 @@ def writeRuntxt(command):
     file.close()
 
 # ------------------------------------------------------------------------------------------
+def writeRuntxt_power(command):
+    file = open("run.txt", "w")
+    file.write("read_library techlib.genlib")
+    file.write("\n")
+    file.write("read ")
+    file.write(command)
+    file.write("\n")
+    file.write("amap; map -a -p")
+    file.write("\n")
+    file.write("write_blif original.blif")
+    file.write("\n")
+    file.write("show")
+    file.close()
+
+# ------------------------------------------------------------------------------------------
 def runABC():
     command = "./abc -f run.txt > abc.log"
     os.system(command)
+
 
 def checkABCError(filename):
     lines = [line.rstrip("\n") for line in open("abc.log")]

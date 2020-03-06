@@ -1,0 +1,21 @@
+# c17
+# 5 inputs
+# 2 outputs
+# 0 inverter
+# 6 gates ( 6 NANDs )
+
+INPUT(1)
+INPUT(2)
+INPUT(3)
+INPUT(6)
+INPUT(7)
+
+OUTPUT(22)
+OUTPUT(23)
+
+10 = XOR(1, 3)
+11 = XOR(3, 6)
+16 = XOR(2, 11)
+19 = XOR(11, 7)
+22 = NAND(10, 16)
+23 = NAND(16, 19)
