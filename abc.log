@@ -1,5 +1,5 @@
 ABC command line: "source run.txt".
 
-Entered genlib library with 18 gates from file "techlib.genlib".
+Entered genlib library with 24 gates from file "techlib.genlib".
 Warning: The network was strashed and balanced before mapping.
-The set has more than 500 nodes. DOT file is not written.
+Warning: The network was strashed and balanced before mapping.

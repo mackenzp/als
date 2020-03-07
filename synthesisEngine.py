@@ -44,6 +44,10 @@ def Sort_Switchings():
         for line in fp:
             tmp = line.split(" ")
             a_line = []
+            tmp[0] = tmp[0].rstrip()
+            tmp[0] = tmp[0].lstrip()
+            tmp[1] = tmp[1].rstrip()
+            tmp[1] = tmp[1].lstrip()
             a_line.append(tmp[0])
             a_line.append(float(tmp[1])*2.16)
             tot.append(a_line)
@@ -59,8 +63,12 @@ def Sort_Switchings():
                 sw.append(tot[i][0])
                 sw_val_ret.append(tot[i][1])
                 break
-        
-    return sw, sw_val_ret
+    
+    # consider only up to 100 cirtical nodes:
+    if(len(sw) > 100):
+        return sw[0:99], sw_val_ret[0:99]
+    else:    
+        return sw, sw_val_ret
             
 
 # class container for network approximation ------------------------------------------------
@@ -634,8 +642,8 @@ class synthesisEngine(object):
 
 
     def printCritPowerNodes(self):
-        print("\nCritical Power nodes: ----")
-        print('{:<7}{:<3}{:>7}'.format("Node: ", "| ", "Delay(ns)"))
+        print("\nCritical Power nodes (showing up to 20 nodes): ----")
+        print('{:<7}{:<3}{:>7}'.format("Node: ", "| ", "Power(uW)"))
         print("-------------------")
         net, val = self.getCritPowerNodes()
         size = len(net)

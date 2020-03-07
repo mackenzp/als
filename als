@@ -12,7 +12,7 @@ import copy
 import time
 
 from synthesisEngine import synthesisEngine
-from Utils import printInit, initFiles, getCommand, writeRuntxt, runABC, checkABCError, is_float, printHelp, writeBlif, printError, trainDNN, setLib
+from Utils import printInit, initFiles, getCommand, writeRuntxt, writeRuntxt_power, runABC, checkABCError, is_float, printHelp, writeBlif, printError, trainDNN, setLib
 
 # adds tab autocomplete capability ---------------------------------------------------------
 try:
@@ -125,8 +125,14 @@ def mapApprox(command, power):
         os.system(system_call)
         system_call = "python3 custom_bench_to_blif.py original.bench > temp.blif"
         os.system(system_call)
-        writeRuntxt("temp.blif")
+        
+        #running ABC for the last time for final optimization:
+        if (power):
+            writeRuntxt_power("temp.blif")
+        else:
+            writeRuntxt("temp.blif")
         runABC()
+
         extract_command = "python3 blif_to_custom_bench.py > original.bench"
         os.system(extract_command)
         extract_command = "python3 node_extract.py original.bench"
@@ -159,9 +165,9 @@ def mapApprox(command, power):
         else:
             print("Initial Critical Delay:    | ", init_delay)
         print("Initial Area:              | ", init_area)
-        print("----------------------------------")
-        print("PreMap Critical Delay:     | ", repl_delay)
-        print("PreMap Area:               | ", repl_area)
+        #print("----------------------------------")
+        #print("PreMap Critical Delay:     | ", repl_delay)
+        #print("PreMap Area:               | ", repl_area)
         print("----------------------------------")
         if(power):
             print("Final switching power:     | ", total_power)

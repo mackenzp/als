@@ -1,4 +1,4 @@
 ABC command line: "source run_sw.txt".
 
-Entered genlib library with 24 gates from file "mcnc.genlib".
-Total switching : 528.684692
+Entered genlib library with 24 gates from file "techlib.genlib".
+Total switching : 68.080086
