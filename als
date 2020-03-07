@@ -30,6 +30,7 @@ def mapApprox(command, power):
     util_dnn = True
     num_iterations = sys.maxsize
     init_command = copy.deepcopy(command)
+    parsed_error_constraint = ""
     parsed_command = init_command.split(" ")
 
     for item in range(0,len(parsed_command)):
@@ -51,7 +52,6 @@ def mapApprox(command, power):
                 print("Specified number of iterations is not an integer")
                 return
             num_iterations = parsed_command[item+1]
-
 
     # checks that the user_error_constraint is of type float before continuing
     if(is_float(parsed_error_constraint)):
