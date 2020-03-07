@@ -28,27 +28,34 @@ except ImportError:
 def mapApprox(command, power):
 
     util_dnn = True
+    num_iterations = sys.maxsize
     init_command = copy.deepcopy(command)
-    # ensure the argument is valid
-    command = command.rstrip()
-    command = command.lstrip()
-    command_list = command.split(" ")
-    if(len(command_list) == 4 and "-nodnn" in command_list):
-        print("\nNot Utilizing DNN")
-        util_dnn = False
-    elif(len(command_list)!=3):
-        print("ERROR: map_approx should have two arguments")
-        print("\t map_approx    <file_path (.blif or .bench)>   <error constraint (0 - 1.0)>")
-        return
+    parsed_command = init_command.split(" ")
 
-    for item in command_list:
-        if("map_approx" in item):
-            command_list.remove(item)
-    command = command_list[0]
+    for item in range(0,len(parsed_command)):
+        if (parsed_command[item] == "-r"):
+            if (item+1 >= len(parsed_command)):
+                print("No error constraint specified for \"-r\"")
+                return
+            parsed_error_constraint = parsed_command[item+1]
+        if (parsed_command[item] == "map_approx"):
+            command = parsed_command[item+1]
+        if (parsed_command[item] == "-nodnn"):
+            print("\nTurning off DNN for synthesis...\n")
+            util_dnn = False
+        if (parsed_command[item] == "-i"):
+            if (item+1 >= len(parsed_command)):
+                print("No specified number of iterations for \"-i\"")
+                return
+            if (parsed_command[item+1].isdigit() == 0):
+                print("Specified number of iterations is not an integer")
+                return
+            num_iterations = parsed_command[item+1]
+
 
     # checks that the user_error_constraint is of type float before continuing
-    if(is_float(command_list[1])):
-        user_error_constraint = float(command_list[1])
+    if(is_float(parsed_error_constraint)):
+        user_error_constraint = float(parsed_error_constraint)
         if (user_error_constraint <= 0.001):
             temp = init_command.split(" ")
             temp.pop(0)
@@ -61,12 +68,13 @@ def mapApprox(command, power):
             return
     else:
         print("ERROR: map_approx should have a valid error constraint between 0.0 and 1.0")
-        print("\t map_approx    <file_path (.blif or .bench)>   <error constraint (0.0 - 1.0)>")
+        print("\t map_approx    <file_path (.blif or .bench)>   -r <error constraint (0.0 - 1.0)>")
         return
 
     if ((".bench" not in command and ".blif" not in command) or len(command)<=6):
         print("ERROR: invalid filetype for map_approx\n")
         return
+
     writeRuntxt(command)
     map_start = time.time()
 #    print("\n calling runABC()")
@@ -97,10 +105,10 @@ def mapApprox(command, power):
         init_area = network.calcArea(1)
         start = time.time()
         if(power):
-            network.approxPower(dnn=util_dnn)
+            network.approxPower(dnn=util_dnn, max_iter=num_iterations)
         else:
-            network.approxDelay(dnn=util_dnn)
-        network.areaClean(dnn=util_dnn)
+            network.approxDelay(dnn=util_dnn, max_iter=num_iterations)
+        network.areaClean(dnn=util_dnn, max_iter=num_iterations)
         end = time.time()
         error = network.calcOutputError()
         repl_delay = network.calcDelay(1)
@@ -183,6 +191,7 @@ def mapExact(command):
     if ((".bench" not in command and ".blif" not in command) or len(command)<=6):
         print("ERROR: invalid filetype for map_exact\n")
         return
+
     writeRuntxt(command)
     runABC()
     # write to original.bench in case user wants to write_blif

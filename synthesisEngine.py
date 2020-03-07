@@ -25,6 +25,7 @@ os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'  # or any {'0', '1', '2'}
 from keras.models import Sequential
 from keras.models import load_model
 from Utils import writeBlif
+
 #=======================================some utility functions:
 def Generate_Switching_File():
     with open("run_sw.txt", "w") as fp:
@@ -939,7 +940,7 @@ class synthesisEngine(object):
 
 
 
-    def approxPower(self, dnn):
+    def approxPower(self, dnn, max_iter=sys.maxsize):
 
         print("Optmizing Power...")
         continue_to_area_opt = 0
@@ -950,13 +951,14 @@ class synthesisEngine(object):
 
         node_hist = []
         index_hist = []
+        num_iter = 0
        
         while(1):
             if(float(self.calcArea(1))/self.init_area <= self.area_thresh):
                 break
             # prints the loading bar
             #print(self.calcTotalPower())
-            sys.stdout.write("\r" + "Trying: " + str(count) )
+            sys.stdout.write("\r" + "Trying: " + str(num_iter) )
             # previous change // used for stopping condition
             last_temp = temp
             # cp is the list of the critical path
@@ -1024,9 +1026,12 @@ class synthesisEngine(object):
                     self.node_by_level[temp[0]][temp[1]][0] = orig_gate
             else:
                 self.nodes_changed.append(firstgate[0])
+            num_iter = num_iter + 1
             # stopping condition // if there is no option for further replacement to make the critical path better
             if (last_temp == temp):
                 self.calcOutputError()
+                break
+            if (int(num_iter) > int(max_iter)):
                 break
 
         #node_hist = []
@@ -1036,7 +1041,7 @@ class synthesisEngine(object):
             if(float(self.calcArea(1))/self.init_area <= self.area_thresh):
                 break
             # prints the loading bar
-            sys.stdout.write("\r" + "Trying: " + str(count) )
+            sys.stdout.write("\r" + "Trying: " + str(num_iter) )
             # previous change // used for stopping condition
             last_temp = temp
             # cp is the list of the critical path
@@ -1110,16 +1115,19 @@ class synthesisEngine(object):
                     self.node_by_level[temp[0]][temp[1]][0] = orig_gate
             else:
                 self.nodes_changed.append(firstgate[0])
+            num_iter = num_iter + 1
             # stopping condition // if there is no option for further replacement to make the critical path better
             if (last_temp == temp):
                 self.calcOutputError()
                 continue_to_area_opt = 1
                 break
+            if (int(num_iter) > int(max_iter)):
+                break
 
 
         # Critical Path Optimization (end) --------------------------------------------------------
 
-    def approxDelay(self, dnn):
+    def approxDelay(self, dnn, max_iter=sys.maxsize):
 
         print("Optmizing Delay...")
         continue_to_area_opt = 0
@@ -1130,12 +1138,13 @@ class synthesisEngine(object):
 
         node_hist = []
         index_hist = []
+        num_iter = 0
 
         while(1):
             if(float(self.calcArea(1))/self.init_area <= self.area_thresh):
                 break
             # prints the loading bar
-            sys.stdout.write("\r" + "Trying: " + str(count) + " | " + "Critical Delay: " + str(self.current_delay) + "     ")
+            sys.stdout.write("\r" + "Trying: " + str(num_iter) + " | " + "Critical Delay: " + str(self.current_delay) + "     ")
             # previous change // used for stopping condition
             last_temp = temp
             # cp is the list of the critical path
@@ -1194,9 +1203,12 @@ class synthesisEngine(object):
                     self.node_by_level[temp[0]][temp[1]][0] = orig_gate
             else:
                 self.nodes_changed.append(firstgate[0])
+            num_iter = num_iter + 1
             # stopping condition // if there is no option for further replacement to make the critical path better
             if (last_temp == temp):
                 self.calcOutputError()
+                break
+            if (int(num_iter) > int(max_iter)):
                 break
 
         #node_hist = []
@@ -1206,7 +1218,7 @@ class synthesisEngine(object):
             if(float(self.calcArea(1))/self.init_area <= self.area_thresh):
                 break
             # prints the loading bar
-            sys.stdout.write("\r" + "Trying: " + str(count) + " | " + "Critical Delay: " + str(self.current_delay) + "     ")
+            sys.stdout.write("\r" + "Trying: " + str(num_iter) + " | " + "Critical Delay: " + str(self.current_delay) + "     ")
             # previous change // used for stopping condition
             last_temp = temp
             # cp is the list of the critical path
@@ -1274,16 +1286,19 @@ class synthesisEngine(object):
                     self.node_by_level[temp[0]][temp[1]][0] = orig_gate
             else:
                 self.nodes_changed.append(firstgate[0])
+            num_iter = num_iter + 1
             # stopping condition // if there is no option for further replacement to make the critical path better
             if (last_temp == temp):
                 self.calcOutputError()
                 continue_to_area_opt = 1
                 break
+            if (int(num_iter) > int(max_iter)):
+                break
 
 
         # Critical Path Optimization (end) --------------------------------------------------------
 
-    def areaClean(self, dnn):
+    def areaClean(self, dnn, max_iter=sys.maxsize):
 
         # Area Optimization // if allowed (begin) -------------------------------------------------
         # Only does area optimization if there is left over error constraint
@@ -1293,6 +1308,7 @@ class synthesisEngine(object):
 
         node_hist = []
         index_hist = []
+        num_iter = 0
 
         # iteration version
         if(continue_to_area_opt):
@@ -1338,10 +1354,9 @@ class synthesisEngine(object):
                                     self.gate_error[index] = "0"
                                     self.calcOutputError()
                                 break
-
-                sys.stdout.write("\r" + "Trying: " + str(count) + " | " + "Area: " + str(self.current_area) + "     ")
-
-                if (cont_break):
+                num_iter = num_iter + 1
+                sys.stdout.write("\r" + "Trying: " + str(num_iter) + " | " + "Area: " + str(self.current_area) + "     ")
+                if (int(num_iter) >= int(max_iter)):
                     break
 
 

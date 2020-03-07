@@ -16,6 +16,8 @@ def initFiles():
 # gets the user command from the terminal --------------------------------------------------
 def getCommand():
     command = input("als > ")
+    # removes extra spaces
+    command = " ".join(command.split())
     return command
 
 # ------------------------------------------------------------------------------------------
