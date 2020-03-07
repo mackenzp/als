@@ -126,6 +126,7 @@ class synthesisEngine(object):
         # dnn initialization
         self.model = Sequential()
         self.model = load_model('model_data_error_train.h5')
+        self.validate_error = 0
 
     # --------------------------------------------------------------------------------------
 
@@ -747,7 +748,7 @@ class synthesisEngine(object):
 
     # gets the error from the dnn
     # every n times runs self.dnnCheckError() and checks how off it is
-    def dnnGetError(self, node, replacement):
+    def dnnGetError(self, node, replacement, validate_error):
         # have some sort of count
         # normalized feature is a list of float values of length 93
         normalized_feature = self.genFeature(node, replacement)
@@ -763,13 +764,14 @@ class synthesisEngine(object):
         dnn_error = round(dnn_error - 0.0125, 4)
         self.current_avg_error = dnn_error
 
-        calibrate = self.alpha * (1- self.current_avg_error/self.error_constraint)
-        if (self.error_count >= calibrate):
-            self.last_calc_error = float(self.calcOutputError())
-            self.alpha = self.energy*(1-self.last_calc_error/self.error_constraint)
-            self.error_count = 0
+        if (validate_error == 1):
+            calibrate = self.alpha * (1- self.current_avg_error/self.error_constraint)
+            if (self.error_count >= calibrate):
+                self.last_calc_error = float(self.calcOutputError())
+                self.alpha = self.energy*(1-self.last_calc_error/self.error_constraint)
+                self.error_count = 0
 
-        self.error_count = self.error_count + 1
+            self.error_count = self.error_count + 1
 
 
 
@@ -948,7 +950,7 @@ class synthesisEngine(object):
 
 
 
-    def approxPower(self, dnn, max_iter=sys.maxsize):
+    def approxPower(self, validate_error, max_iter=sys.maxsize):
 
         print("Optmizing Power...")
         continue_to_area_opt = 0
@@ -1011,10 +1013,9 @@ class synthesisEngine(object):
                     node_hist.append(orig_gate)
                     index_hist.append(temp)
 
-                    if (dnn):
-                        self.dnnGetError(self.getNode(orig_gate), efficient_gate)
-                    else:
-                        self.calcOutputError()
+
+                    self.dnnGetError(self.getNode(orig_gate), efficient_gate, validate_error)
+
                     count = count + 1
                     # if error contraint violated, replace the node with the original and set local error to 0
                     if (float(self.current_avg_error) > self.error_constraint):
@@ -1099,10 +1100,7 @@ class synthesisEngine(object):
                     node_hist.append(orig_gate)
                     index_hist.append(temp)
 
-                    if(dnn):
-                        self.dnnGetError(self.getNode(orig_gate), efficient_gate)
-                    else:
-                        self.calcOutputError()
+                    self.dnnGetError(self.getNode(orig_gate), efficient_gate, validate_error)
 
                     count = count + 1
                     # if error contraint violated, replace the node with the original and set local error to 0
@@ -1135,7 +1133,7 @@ class synthesisEngine(object):
 
         # Critical Path Optimization (end) --------------------------------------------------------
 
-    def approxDelay(self, dnn, max_iter=sys.maxsize):
+    def approxDelay(self, validate_error, max_iter=sys.maxsize):
 
         print("Optmizing Delay...")
         continue_to_area_opt = 0
@@ -1188,10 +1186,8 @@ class synthesisEngine(object):
                     node_hist.append(orig_gate)
                     index_hist.append(temp)
 
-                    if (dnn):
-                        self.dnnGetError(self.getNode(orig_gate), fast_gate)
-                    else:
-                        self.calcOutputError()
+                    self.dnnGetError(self.getNode(orig_gate), fast_gate, validate_error)
+
                     count = count + 1
                     # if error contraint violated, replace the node with the original and set local error to 0
                     if (float(self.current_avg_error) > self.error_constraint):
@@ -1270,10 +1266,9 @@ class synthesisEngine(object):
                     node_hist.append(orig_gate)
                     index_hist.append(temp)
 
-                    if(dnn):
-                        self.dnnGetError(self.getNode(orig_gate), fast_gate)
-                    else:
-                        self.calcOutputError()
+
+                    self.dnnGetError(self.getNode(orig_gate), fast_gate, validate_error)
+
 
                     count = count + 1
                     # if error contraint violated, replace the node with the original and set local error to 0
@@ -1306,8 +1301,8 @@ class synthesisEngine(object):
 
         # Critical Path Optimization (end) --------------------------------------------------------
 
-    def areaClean(self, dnn, max_iter=sys.maxsize):
-
+    def areaClean(self, validate_error, max_iter=sys.maxsize):
+        
         # Area Optimization // if allowed (begin) -------------------------------------------------
         # Only does area optimization if there is left over error constraint
         # This happens after minimizing the critical path
@@ -1323,8 +1318,8 @@ class synthesisEngine(object):
             print("\n\nOptimizing area with left over error constraint...")
             cont_break = 0
             for level in range(0, len(self.node_by_level)-1):
-                if (float(self.calcArea(1)) / self.init_area <= self.area_thresh):
-                    break
+                #if (float(self.calcArea(1)) / self.init_area <= self.area_thresh):
+                #    break
                 for i in range(0,len(self.node_by_level[level])-1):
                     gate = self.node_by_level[level][i]
                     if (gate[3] not in self.nodes_changed and gate[0] != "one" and gate[0] != "zero"):
@@ -1344,14 +1339,14 @@ class synthesisEngine(object):
                             node_hist.append(orig_gate)
                             index_hist.append(temp)
 
-                            if(dnn):
-                                self.dnnGetError(self.getNode(orig_gate), faster_gate)
-                            else:
-                                self.calcOutputError()
+                            self.dnnGetError(self.getNode(orig_gate), faster_gate, validate_error)
 
                             count = count + 1
                             if (float(self.current_avg_error) > self.error_constraint):
-                                self.calcOutputError()
+                                if (validate_error):
+                                    self.calcOutputError()
+                                else:
+                                    continue
                                 while (float(self.current_avg_error) > self.error_constraint):
                                     orig_gate = node_hist.pop()
                                     orig_index = index_hist.pop()
@@ -1360,7 +1355,9 @@ class synthesisEngine(object):
                                         self.nodes_changed.remove(orig_gate[3])
                                     self.node_by_level[orig_index[0]][orig_index[1]][0] = orig_gate[0]
                                     self.gate_error[index] = "0"
-                                    self.calcOutputError()
+                                    if (validate_error):
+                                        self.calcOutputError()
+
                                 break
                 num_iter = num_iter + 1
                 sys.stdout.write("\r" + "Trying: " + str(num_iter) + " | " + "Area: " + str(self.current_area) + "     ")

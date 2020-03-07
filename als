@@ -27,7 +27,8 @@ except ImportError:
 # utilizes the DNN to do approximate synthesis ----------------------------------------------
 def mapApprox(command, power):
 
-    util_dnn = True
+    validate_error = False
+    area = False
     num_iterations = sys.maxsize
     init_command = copy.deepcopy(command)
     parsed_error_constraint = ""
@@ -41,9 +42,12 @@ def mapApprox(command, power):
             parsed_error_constraint = parsed_command[item+1]
         if (parsed_command[item] == "map_approx"):
             command = parsed_command[item+1]
-        if (parsed_command[item] == "-nodnn"):
-            print("\nTurning off DNN for synthesis...\n")
-            util_dnn = False
+        if (parsed_command[item] == "-val"):
+            print("\nValiating Error during synthesis...\n")
+            validate_error = True
+        if (parsed_command[item] == "-a"):
+            print("\nOptimizing area at end of Synthesis...\n")
+            area = True
         if (parsed_command[item] == "-i"):
             if (item+1 >= len(parsed_command)):
                 print("No specified number of iterations for \"-i\"")
@@ -105,10 +109,11 @@ def mapApprox(command, power):
         init_area = network.calcArea(1)
         start = time.time()
         if(power):
-            network.approxPower(dnn=util_dnn, max_iter=num_iterations)
+            network.approxPower(validate_error=validate_error, max_iter=num_iterations)
         else:
-            network.approxDelay(dnn=util_dnn, max_iter=num_iterations)
-        network.areaClean(dnn=util_dnn, max_iter=num_iterations)
+            network.approxDelay(validate_error=validate_error, max_iter=num_iterations)
+        if (area):
+            network.areaClean(validate_error=validate_error, max_iter=num_iterations)
         end = time.time()
         error = network.calcOutputError()
         repl_delay = network.calcDelay(1)
