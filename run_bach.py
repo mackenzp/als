@@ -47,7 +47,7 @@ while (cont == 0):
    cont = int(input("proceed(1) or try another path(0)? "))
  else:
   print (working_directory+"/"+folder_to_write+" does not exist, creating the folder...")
-  os.mkdir(working_directory+"/"+folder_to_write)
+  os.makedirs(working_directory+"/"+folder_to_write)
   if (os.path.isdir(working_directory+"/"+folder_to_write) == True):
    print("created, saving results inside.")
    cont = 1
