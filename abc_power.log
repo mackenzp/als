@@ -1,4 +1,4 @@
 ABC command line: "source run_power.txt".
 
 Entered genlib library with 24 gates from file "techlib.genlib".
-[1;37m.modelc432                    :[0m i/o =   36/    7  lat =    0  nd =   133  edge =    330  area =349.00  delay =32.50  lev = 19  power = 114.48
+[1;37m.modelc5315                   :[0m i/o =  178/  123  lat =    0  nd =   672  edge =   1590  area =1665.00  delay =20.80  lev = 13  power = 732.26
