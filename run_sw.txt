@@ -1,1 +1,0 @@
-r techlib.genlib; r original.blif; printSwitching; q;
