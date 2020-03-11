@@ -1,0 +1,100 @@
+.model KSA4_new
+.inputs a0 a1 a2 a3 b0 b1 b2 b3 cin
+.outputs sum0 sum1 sum2 sum3 cout
+.names a0 b0 n15
+01 1
+.names a0 b0 n16
+10 1
+.names n15 n16 n17
+00 1
+.names cin n17 n18
+11 1
+.names cin n17 n19
+00 1
+.names n18 n19 sum0
+00 0
+.names a1 b1 n21
+01 1
+.names a1 b1 n22
+10 1
+.names n21 n22 n23
+00 1
+.names a0 b0 n24
+11 1
+.names cin n17 n25
+10 1
+.names n24 n25 n26
+00 1
+.names n23 n26 n27
+10 1
+.names n23 n26 n28
+01 1
+.names n27 n28 sum1
+00 0
+.names a2 b2 n30
+01 1
+.names a2 b2 n31
+10 1
+.names n30 n31 n32
+00 1
+.names n17 n23 n33
+00 1
+.names a1 b1 n34
+11 1
+.names n23 n24 n35
+01 1
+.names n34 n35 n36
+00 1
+.names cin n33 n37
+11 1
+.names n36 n37 n38
+10 1
+.names n32 n38 n39
+10 1
+.names n32 n38 n40
+01 1
+.names n39 n40 sum2
+00 0
+.names a3 b3 n42
+01 1
+.names a3 b3 n43
+10 1
+.names n42 n43 n44
+00 1
+.names n23 n32 n45
+00 1
+.names a2 b2 n46
+11 1
+.names n32 n34 n47
+01 1
+.names n46 n47 n48
+00 1
+.names n26 n45 n49
+01 1
+.names n48 n49 n50
+10 1
+.names n44 n50 n51
+10 1
+.names n44 n50 n52
+01 1
+.names n51 n52 sum3
+00 0
+.names n32 n44 n54
+00 1
+.names n33 n54 n55
+11 1
+.names a3 b3 n56
+11 1
+.names n44 n46 n57
+01 1
+.names n56 n57 n58
+00 1
+.names n36 n54 n59
+01 1
+.names n58 n59 n60
+10 1
+.names cin n55 n61
+11 1
+.names n60 n61 cout
+10 0
+.end

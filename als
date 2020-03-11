@@ -184,6 +184,8 @@ def mapApprox(command, power):
 
         # unnecessary file removal
         os.system("rm *.dot > /dev/null")
+        os.system("rm *.txt > /dev/null")
+        os.system("rm *.log > /dev/null")
         command = "ls .model* > /dev/null 2>&1"
         if (os.system(command) == 0):
             os.system("rm .model* > /dev/null")
