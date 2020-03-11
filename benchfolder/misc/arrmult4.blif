@@ -1,0 +1,172 @@
+.model Multi4
+.inputs a0 a1 a2 a3 b0 b1 b2 b3
+.outputs m0 m1 m2 m3 m4 m5 m6 m7
+.names a0 b0 m0
+11 1
+.names a1 b0 n18
+11 1
+.names a0 b1 n19
+11 1
+.names n18 n19 n20
+11 1
+.names n18 n19 n21
+00 1
+.names n20 n21 m1
+00 1
+.names a2 b0 n23
+11 1
+.names a1 b1 n24
+11 1
+.names n23 n24 n25
+11 1
+.names n23 n24 n26
+00 1
+.names n25 n26 n27
+00 1
+.names n20 n27 n28
+11 1
+.names n20 n27 n29
+00 1
+.names n28 n29 n30
+00 1
+.names a0 b2 n31
+11 1
+.names n30 n31 n32
+11 1
+.names n30 n31 n33
+00 1
+.names n32 n33 m2
+00 1
+.names n25 n28 n35
+00 1
+.names a3 b0 n36
+11 1
+.names a2 b1 n37
+11 1
+.names n36 n37 n38
+11 1
+.names n36 n37 n39
+00 1
+.names n38 n39 n40
+00 1
+.names n35 n40 n41
+01 1
+.names n35 n40 n42
+10 1
+.names n41 n42 n43
+00 1
+.names a1 b2 n44
+11 1
+.names n43 n44 n45
+11 1
+.names n43 n44 n46
+00 1
+.names n45 n46 n47
+00 1
+.names n32 n47 n48
+11 1
+.names n32 n47 n49
+00 1
+.names n48 n49 n50
+00 1
+.names a0 b3 n51
+11 1
+.names n50 n51 n52
+11 1
+.names n50 n51 n53
+00 1
+.names n52 n53 m3
+00 1
+.names n45 n48 n55
+00 1
+.names n38 n41 n56
+00 1
+.names a3 b1 n57
+11 1
+.names n56 n57 n58
+01 1
+.names n56 n57 n59
+10 1
+.names n58 n59 n60
+00 1
+.names a2 b2 n61
+11 1
+.names n60 n61 n62
+11 1
+.names n60 n61 n63
+00 1
+.names n62 n63 n64
+00 1
+.names n55 n64 n65
+01 1
+.names n55 n64 n66
+10 1
+.names n65 n66 n67
+00 1
+.names a1 b3 n68
+11 1
+.names n67 n68 n69
+11 1
+.names n67 n68 n70
+00 1
+.names n69 n70 n71
+00 1
+.names n52 n71 n72
+11 1
+.names n52 n71 n73
+00 1
+.names n72 n73 m4
+00 1
+.names n69 n72 n75
+00 1
+.names n62 n65 n76
+00 1
+.names a3 b2 n77
+11 1
+.names n58 n77 n78
+11 1
+.names n58 n77 n79
+00 1
+.names n78 n79 n80
+00 1
+.names n76 n80 n81
+01 1
+.names n76 n80 n82
+10 1
+.names n81 n82 n83
+00 1
+.names a2 b3 n84
+11 1
+.names n83 n84 n85
+11 1
+.names n83 n84 n86
+00 1
+.names n85 n86 n87
+00 1
+.names n75 n87 n88
+01 1
+.names n75 n87 n89
+10 1
+.names n88 n89 m5
+00 1
+.names n85 n88 n91
+00 1
+.names n78 n81 n92
+00 1
+.names a3 b3 n93
+11 1
+.names n92 n93 n94
+01 1
+.names n92 n93 n95
+10 1
+.names n94 n95 n96
+00 1
+.names n91 n96 n97
+01 1
+.names n91 n96 n98
+10 1
+.names n97 n98 m6
+00 1
+.names n94 n97 m7
+00 0
+.end
