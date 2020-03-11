@@ -379,7 +379,7 @@ class synthesisEngine(object):
             gate_count = gate_count + 1
 
         # load in the normalized features
-        temp_normalize_list = [line.rstrip("\n") for line in open("td_normalization_values.txt")]
+        temp_normalize_list = [line.rstrip("\n") for line in open("td_normalization_values")]
         self.normalize_list = []
         for item in temp_normalize_list:
             temp_float = []
