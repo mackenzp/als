@@ -1348,15 +1348,18 @@ class synthesisEngine(object):
                                 else:
                                     continue
                                 while (float(self.current_avg_error) > self.error_constraint):
-                                    orig_gate = node_hist.pop()
-                                    orig_index = index_hist.pop()
-                                    index = self.node_by_level[orig_index[0]][orig_index[1]][2]
-                                    if (orig_gate[3] in self.nodes_changed):
-                                        self.nodes_changed.remove(orig_gate[3])
-                                    self.node_by_level[orig_index[0]][orig_index[1]][0] = orig_gate[0]
-                                    self.gate_error[index] = "0"
-                                    if (validate_error):
-                                        self.calcOutputError()
+                                    if (len(node_hist) != 0):
+                                        orig_gate = node_hist.pop()
+                                        orig_index = index_hist.pop()
+                                        index = self.node_by_level[orig_index[0]][orig_index[1]][2]
+                                        if (orig_gate[3] in self.nodes_changed):
+                                            self.nodes_changed.remove(orig_gate[3])
+                                        self.node_by_level[orig_index[0]][orig_index[1]][0] = orig_gate[0]
+                                        self.gate_error[index] = "0"
+                                        if (validate_error):
+                                            self.calcOutputError()
+                                    else:
+                                        break
 
                                 break
                 num_iter = num_iter + 1
