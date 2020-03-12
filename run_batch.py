@@ -129,7 +129,8 @@ for file_name in file_list:
  file_index = file_index + 1
  print("\nExecuting file "+ str(file_index) + " out of " + str(total_files))
  print("Working on ..."+ str(file_name))
- command = "./als '" + str(command_p) + " " + folder_to_read + file_name + " " + str(parameters) + "' >> " + str(folder_to_write) + file_name + "_out.txt"
+ temp = file_name.split(".")
+ command = "./als '" + str(command_p) + " " + folder_to_read + file_name + " " + str(parameters) + "' >> " + str(folder_to_write) + temp[0] + "_out.txt"
  print(command)
  os.system(command)
 print("done")

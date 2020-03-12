@@ -29,6 +29,7 @@ def mapApprox(command, power):
 
     validate_error = False
     area = False
+    fVerbose = False
     num_iterations = sys.maxsize
     init_command = copy.deepcopy(command)
     parsed_error_constraint = ""
@@ -43,11 +44,13 @@ def mapApprox(command, power):
         if (parsed_command[item] == "map_approx"):
             command = parsed_command[item+1]
         if (parsed_command[item] == "-val"):
-            print("\nValiating Error during synthesis...\n")
+            #print("\nValiating Error during synthesis...\n")
             validate_error = True
         if (parsed_command[item] == "-a"):
-            print("\nOptimizing area at end of Synthesis...\n")
+            #print("\nOptimizing area at end of Synthesis...\n")
             area = True
+        if (parsed_command[item] == "-v"):
+            fVerbose = True
         if (parsed_command[item] == "-i"):
             if (item+1 >= len(parsed_command)):
                 print("No specified number of iterations for \"-i\"")
@@ -93,33 +96,37 @@ def mapApprox(command, power):
 
     # checks that the filename is correct and that ABC was able to successfully map
     if(not checkABCError(command)):
-
-        print("\nExact Network:")
+        if(fVerbose):
+            print("\nExact Network:")
         network = synthesisEngine(error_constraint=user_error_constraint)
         network.loadLibraryStats()
         network.loadNetwork()
-        network.printGates()
+        if(fVerbose):
+            network.printGates()
         network.getCritPath()
         if(power):
-            network.printCritPowerNodes()
+            if(fVerbose):
+                network.printCritPowerNodes()
             init_power = network.calcTotalPower()
         else:
-            network.printCritPath()
+            if(fVerbose):
+                network.printCritPath()
             init_delay = network.calcDelay(1)
         init_area = network.calcArea(1)
         start = time.time()
         if(power):
-            network.approxPower(validate_error=validate_error, max_iter=num_iterations)
+            network.approxPower(validate_error=validate_error, fVerbose=fVerbose, max_iter=num_iterations)
         else:
-            network.approxDelay(validate_error=validate_error, max_iter=num_iterations)
+            network.approxDelay(validate_error=validate_error, fVerbose=fVerbose, max_iter=num_iterations)
         if (area):
-            network.areaClean(validate_error=validate_error, max_iter=num_iterations)
+            network.areaClean(validate_error=validate_error, fVerbose=fVerbose,  max_iter=num_iterations)
         end = time.time()
         error = network.calcOutputError()
-        repl_delay = network.calcDelay(1)
-        repl_area = network.calcArea(1)
+        #repl_delay = network.calcDelay(1)
+        #repl_area = network.calcArea(1)
         #network.getCritPath()
-        network.writeNodeTypes()
+        if(fVerbose):
+            network.writeNodeTypes()
 
         # get the error at all outputs
         command = "./error -all"
@@ -145,28 +152,31 @@ def mapApprox(command, power):
         os.system("rm temp.blif")
         #end = time.time()
 
-
-        print("\n\nApproximated Network:")
+        if(fVerbose):
+            print("\n\nApproximated Network:")
         network.reset()
         network.loadLibraryStats()
         network.loadNetwork()
         network.calcArea(1)
-        network.printGates()
+        if(fVerbose):
+            network.printGates()
         network.getCritPath()
         if(power):
-            network.printCritPowerNodes()
+            if(fVerbose):
+                network.printCritPowerNodes()
         else:
-            network.printCritPath()
+            if(fVerbose):
+                network.printCritPath()
         final_delay = network.calcDelay(1)
         final_area = network.calcArea(1)
         total_power = network.calcTotalPower()
 
-        print("\nSynthesis Time (seconds):", round(end - start,6))
+        print("run-time (seconds):", round(end - start,6))
 
-        print("\nResults:")
+        print("Results:")
         print("----------------------------------")
         if(power):
-            print("Initial switching power:   | ", init_power)
+            print("Initial switching power:   |  %.2f" %init_power)
         else:
             print("Initial Critical Delay:    | ", init_delay)
         print("Initial Area:              | ", init_area)
@@ -175,7 +185,7 @@ def mapApprox(command, power):
         #print("PreMap Area:               | ", repl_area)
         print("----------------------------------")
         if(power):
-            print("Final switching power:     | ", total_power)
+            print("Final switching power:     |  %.2f" %total_power)
         else:
             print("Final Critical Delay:      | ", final_delay)
         print("Final Area:                | ", final_area)

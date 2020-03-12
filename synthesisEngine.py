@@ -651,7 +651,9 @@ class synthesisEngine(object):
         if(size > 20):
             size = 20 # print up to 20 critical nodes not more!
         for idx in range(size):
-            print('{:<6}{:<3}{:>6}'.format(net[idx], " | ", val[idx]))
+            temp = int(val[idx]*100)
+            temp = float(temp/100)
+            print('{:<6}{:<3}{:>6}'.format(net[idx], " | ", temp))
         print("-------------------")
 
 
@@ -950,9 +952,9 @@ class synthesisEngine(object):
 
 
 
-    def approxPower(self, validate_error, max_iter=sys.maxsize):
-
-        print("Optmizing Power...")
+    def approxPower(self, validate_error, fVerbose, max_iter=sys.maxsize):
+        if(fVerbose):
+            print("Optmizing Power...")
         continue_to_area_opt = 0
 
         # Critical Path Optimization (begin) -------------------------------------------------------
@@ -968,7 +970,8 @@ class synthesisEngine(object):
                 break
             # prints the loading bar
             #print(self.calcTotalPower())
-            sys.stdout.write("\r" + "Trying: " + str(num_iter) )
+            if(fVerbose):
+                sys.stdout.write("\r" + "Trying: " + str(num_iter) )
             # previous change // used for stopping condition
             last_temp = temp
             # cp is the list of the critical path
@@ -1050,7 +1053,8 @@ class synthesisEngine(object):
             if(float(self.calcArea(1))/self.init_area <= self.area_thresh):
                 break
             # prints the loading bar
-            sys.stdout.write("\r" + "Trying: " + str(num_iter) )
+            if(fVerbose):
+                sys.stdout.write("\r" + "Trying: " + str(num_iter) )
             # previous change // used for stopping condition
             last_temp = temp
             # cp is the list of the critical path
@@ -1133,9 +1137,9 @@ class synthesisEngine(object):
 
         # Critical Path Optimization (end) --------------------------------------------------------
 
-    def approxDelay(self, validate_error, max_iter=sys.maxsize):
-
-        print("Optmizing Delay...")
+    def approxDelay(self, validate_error, fVerbose, max_iter=sys.maxsize):
+        if(fVerbose):
+            print("Optmizing Delay...")
         continue_to_area_opt = 0
 
         # Critical Path Optimization (begin) -------------------------------------------------------
@@ -1150,7 +1154,8 @@ class synthesisEngine(object):
             if(float(self.calcArea(1))/self.init_area <= self.area_thresh):
                 break
             # prints the loading bar
-            sys.stdout.write("\r" + "Trying: " + str(num_iter) + " | " + "Critical Delay: " + str(self.current_delay) + "     ")
+            if(fVerbose):
+                sys.stdout.write("\r" + "Trying: " + str(num_iter) + " | " + "Critical Delay: " + str(self.current_delay) + "     ")
             # previous change // used for stopping condition
             last_temp = temp
             # cp is the list of the critical path
@@ -1222,7 +1227,8 @@ class synthesisEngine(object):
             if(float(self.calcArea(1))/self.init_area <= self.area_thresh):
                 break
             # prints the loading bar
-            sys.stdout.write("\r" + "Trying: " + str(num_iter) + " | " + "Critical Delay: " + str(self.current_delay) + "     ")
+            if(fVerbose):
+                sys.stdout.write("\r" + "Trying: " + str(num_iter) + " | " + "Critical Delay: " + str(self.current_delay) + "     ")
             # previous change // used for stopping condition
             last_temp = temp
             # cp is the list of the critical path
@@ -1301,7 +1307,7 @@ class synthesisEngine(object):
 
         # Critical Path Optimization (end) --------------------------------------------------------
 
-    def areaClean(self, validate_error, max_iter=sys.maxsize):
+    def areaClean(self, validate_error, fVerbose, max_iter=sys.maxsize):
         
         # Area Optimization // if allowed (begin) -------------------------------------------------
         # Only does area optimization if there is left over error constraint
@@ -1315,7 +1321,8 @@ class synthesisEngine(object):
 
         # iteration version
         if(continue_to_area_opt):
-            print("\n\nOptimizing area with left over error constraint...")
+            if(fVerbose):
+                print("\nOptimizing area with left over error constraint...")
             cont_break = 0
             for level in range(0, len(self.node_by_level)-1):
                 #if (float(self.calcArea(1)) / self.init_area <= self.area_thresh):
@@ -1363,7 +1370,8 @@ class synthesisEngine(object):
 
                                 break
                 num_iter = num_iter + 1
-                sys.stdout.write("\r" + "Trying: " + str(num_iter) + " | " + "Area: " + str(self.current_area) + "     ")
+                if(fVerbose):
+                    sys.stdout.write("\r" + "Trying: " + str(num_iter) + " | " + "Area: " + str(self.current_area) + "     ")
                 if (int(num_iter) >= int(max_iter)):
                     break
 
