@@ -256,8 +256,9 @@ def commandHandler(command):
         writeBlif(command, 1, model_name)
         #save this blif file 
         path = "temp_blif"
-        if os.path.exists(path): rmtree(path)
-        os.makedirs(path)
+        #if os.path.exists(path): rmtree(path)
+        if os.path.exists(path) is False:
+            os.makedirs(path)
         os.system("cp " + blif_file + " " + path)
     elif ("print_error" in command):
         printError()
