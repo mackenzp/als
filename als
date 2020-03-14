@@ -13,6 +13,7 @@ import time
 
 from synthesisEngine import synthesisEngine
 from Utils import printInit, initFiles, getCommand, writeRuntxt, writeRuntxt_power, runABC, checkABCError, is_float, printHelp, writeBlif, printError, trainDNN, setLib, del_unnecessary_files
+from shutil import rmtree
 
 # adds tab autocomplete capability ---------------------------------------------------------
 try:
@@ -196,7 +197,7 @@ def mapApprox(command, power):
 # map the exact network using abc -----------------------------------------------------------
 def mapExact(command):
     # ensure the argument is valid
-    command_list = command.split(" ")
+    command_list = command.split(" ") 
     if(len(command_list)!=2):
         print("ERROR: map_approx should have one argument\n")
         return
@@ -249,9 +250,16 @@ def commandHandler(command):
         model_name = model_name[1]
         model_name = model_name.lstrip()
         model_name = model_name.rstrip()
+        blif_file = model_name
         model_name = model_name.split(".")
         model_name = model_name[0]
         writeBlif(command, 1, model_name)
+        #save this blif file 
+        path = "temp_blif"
+        #if os.path.exists(path): rmtree(path)
+        if os.path.exists(path) is False:
+            os.makedirs(path)
+        os.system("cp " + blif_file + " " + path)
     elif ("print_error" in command):
         printError()
     elif ("train_dnn" in command):
