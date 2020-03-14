@@ -1,6 +1,11 @@
 import os
 import copy
 import time
+import shutil
+import pathlib
+from os.path import join
+from os import listdir, rmdir
+from shutil import move
 #===========================================================================================
 # prints the welcome message when opened ---------------------------------------------------
 def printInit():
@@ -73,6 +78,16 @@ def is_float(s_in):
             result = True
     return result
 
+def copyDirectory(src, dest):
+    try:
+        shutil.copytree(src, dest)
+    # Directories are the same
+    except shutil.Error as e:
+        print('Directory not copied. Error: %s' % e)
+    # Any error saying that the directory doesn't exist
+    except OSError as e:
+        print('Directory not copied. Error: %s' % e)
+
 def del_unnecessary_files():
     os.system("rm *.dot > /dev/null")
     os.system("rm *.txt > /dev/null")
@@ -82,6 +97,14 @@ def del_unnecessary_files():
     command = "ls .model* > /dev/null 2>&1"
     if (os.system(command) == 0):
         os.system("rm .model* > /dev/null")
+    #returning .blif file back:
+    current_path = os.getcwd()
+    path = join(current_path, "temp_blif")
+    if os.path.exists(path):
+        #copyDirectory(path, current_path)
+        for filename in listdir(path):
+            move(join(path, filename), join(current_path, filename))
+        rmdir(path)
 
 # prints the possible commands that can be run for the user --------------------------------
 def printHelp(): 
