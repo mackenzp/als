@@ -533,7 +533,7 @@ class synthesisEngine(object):
     def calcTotalPower(self):
         total_power = 0.0
         #first write the current network into a temp file:
-        writeBlif("write_blif temp_power.blif", 0)
+        writeBlif("write_blif temp_power.blif", 0, "temp_power")
         #now, generate the script file for abc:
         with open("run_power.txt", "w") as fp:
             fp.write("r techlib.genlib; r temp_power.blif; ps -p; q;\n")

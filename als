@@ -12,7 +12,7 @@ import copy
 import time
 
 from synthesisEngine import synthesisEngine
-from Utils import printInit, initFiles, getCommand, writeRuntxt, writeRuntxt_power, runABC, checkABCError, is_float, printHelp, writeBlif, printError, trainDNN, setLib
+from Utils import printInit, initFiles, getCommand, writeRuntxt, writeRuntxt_power, runABC, checkABCError, is_float, printHelp, writeBlif, printError, trainDNN, setLib, del_unnecessary_files
 
 # adds tab autocomplete capability ---------------------------------------------------------
 try:
@@ -192,13 +192,6 @@ def mapApprox(command, power):
         print("----------------------------------")
         print("Error Rate:                | ", error)
 
-        # unnecessary file removal
-        os.system("rm *.dot > /dev/null")
-        os.system("rm *.txt > /dev/null")
-        os.system("rm *.log > /dev/null")
-        command = "ls .model* > /dev/null 2>&1"
-        if (os.system(command) == 0):
-            os.system("rm .model* > /dev/null")
 
 # map the exact network using abc -----------------------------------------------------------
 def mapExact(command):
@@ -234,13 +227,6 @@ def mapExact(command):
     os.system(command)
     print("\nNetwork has been mapped with:\nAverage error:\t0%\n")
 
-    # unnecessary file removal
-    os.system("rm *.dot > /dev/null")
-    command = "ls .model* > /dev/null 2>&1"
-    if (os.system(command) == 0):
-        os.system("rm .model* > /dev/null")
-
-
 
 # handles and distributes the commands from the user to their respective functions -----------
 def commandHandler(command):
@@ -259,7 +245,13 @@ def commandHandler(command):
     elif ("map_exact" in command):
         mapExact(command)
     elif ("write_blif" in command):
-        writeBlif(command, 1)
+        model_name = command.split(" ")
+        model_name = model_name[1]
+        model_name = model_name.lstrip()
+        model_name = model_name.rstrip()
+        model_name = model_name.split(".")
+        model_name = model_name[0]
+        writeBlif(command, 1, model_name)
     elif ("print_error" in command):
         printError()
     elif ("train_dnn" in command):
@@ -286,5 +278,8 @@ def main():
         command = sys.argv[1]
         sys.argv[1] ="quit" 
         commandHandler(command)
+    # unnecessary file removal
+    del_unnecessary_files()
+    
 if __name__ == "__main__":
     main()

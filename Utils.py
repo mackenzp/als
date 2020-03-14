@@ -43,7 +43,7 @@ def writeRuntxt_power(command):
     file.write("read ")
     file.write(command)
     file.write("\n")
-    file.write("amap; map -a -p")
+    file.write("amap; map -a")
     file.write("\n")
     file.write("write_blif original.blif")
     file.write("\n")
@@ -73,6 +73,16 @@ def is_float(s_in):
             result = True
     return result
 
+def del_unnecessary_files():
+    os.system("rm *.dot > /dev/null")
+    os.system("rm *.txt > /dev/null")
+    os.system("rm *.log > /dev/null")
+    os.system("rm *.bench > /dev/null")
+    os.system("rm *.blif > /dev/null")
+    command = "ls .model* > /dev/null 2>&1"
+    if (os.system(command) == 0):
+        os.system("rm .model* > /dev/null")
+
 # prints the possible commands that can be run for the user --------------------------------
 def printHelp(): 
     print("\tSynthesize Command(s):")
@@ -87,7 +97,7 @@ def printHelp():
     print("\tTrain Command(s):")
     print("\t train_dnn")
 
-def writeBlif(command, verbose):
+def writeBlif(command, verbose, model_name):
     # ensure the argument is valid
     command_list = command.split(" ")
     if(len(command_list)!=2):
@@ -100,14 +110,29 @@ def writeBlif(command, verbose):
     if (".blif" not in command or len(command)<=6):
         print("ERROR: invalid filetype for write_blif\n")
         return
-
+    
     system_call = "python3 node_types_to_blif.py"
     os.system(system_call)
     system_call = "python3 custom_bench_to_blif.py original.bench >" + command
     os.system(system_call)
     if(verbose):
         print("Successfully wrote mapped network to", command)
-    #print("\n")
+
+    #fixing .model name:
+    tmp = open("temp__blif.blif", "w")
+    with open(command, "r") as fp:
+        for line in fp:
+            if(line.startswith(".model")):
+                tmp.write(".model  " + model_name + "\n")
+            else:
+                tmp.write(line)
+    tmp.close()
+    #os.system("cp " + tmp + " " + command + "\n")
+    tmp = open("temp__blif.blif", "r")
+    with open(command, "w") as fp:
+        for line in tmp:
+            fp.write(line)
+    tmp.close()
 
 
 def printError():
