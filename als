@@ -197,7 +197,7 @@ def mapApprox(command, power):
 # map the exact network using abc -----------------------------------------------------------
 def mapExact(command):
     # ensure the argument is valid
-    command_list = command.split(" ")
+    command_list = command.split(" ") 
     if(len(command_list)!=2):
         print("ERROR: map_approx should have one argument\n")
         return
