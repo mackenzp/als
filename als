@@ -14,7 +14,9 @@ import time
 from synthesisEngine import synthesisEngine
 from Utils import printInit, initFiles, getCommand, writeRuntxt, writeRuntxt_power, runABC, checkABCError, is_float, printHelp, writeBlif, printError, trainDNN, setLib, del_unnecessary_files
 from shutil import rmtree
-
+#====================================global varaibales======================================
+model_name_file = "temp__blif.blif"
+#===========================================================================================
 # adds tab autocomplete capability ---------------------------------------------------------
 try:
 	import readline
@@ -224,13 +226,21 @@ def mapExact(command):
     network.getCritPath()
     network.printCritPath()
     network.calcOutputError()
+    final_delay = network.calcDelay(1)
+    final_area = network.calcArea(1)
+    total_power = network.calcTotalPower()
     command = "./error -all"
     os.system(command)
-    print("\nNetwork has been mapped with:\nAverage error:\t0%\n")
+    print("\nNetwork has been mapped with:")
+    print("Final switching power:     |  %.2f" %total_power)
+    print("Final Critical Delay:      | ", final_delay)
+    print("Final Area:                | ", final_area)
+    print("Average error:\t0%\n")
 
 
 # handles and distributes the commands from the user to their respective functions -----------
 def commandHandler(command):
+    global model_name_file
     exit_list = ["quit", "exit", "q"]
     if (command == ""):
         return
@@ -253,6 +263,7 @@ def commandHandler(command):
         blif_file = model_name
         model_name = model_name.split(".")
         model_name = model_name[0]
+        model_name_file = model_name + ".blif"
         writeBlif(command, 1, model_name)
         #save this blif file 
         path = "temp_blif"
@@ -266,6 +277,15 @@ def commandHandler(command):
         trainDNN()
     elif ("read_library" in command):
         setLib(command)
+    elif ("show -g" in command):
+        print("Before calling this command, write_blif should have been invoked!")
+        file = open("run.txt", "w")
+        file.write("read_library techlib.genlib \n")
+        file.write("read " + model_name_file + "\n")
+        file.write("show -g\n")
+        file.close()
+        runABC()
+        print("Please go and open " + model_name_file[:-5] + ".dot")
     elif (command not in exit_list):
         print("Command not recognized, type \"help\" for a list of commands\n")
 

@@ -119,6 +119,8 @@ def printHelp():
     print("\n")
     print("\tTrain Command(s):")
     print("\t train_dnn")
+    print("\n")
+    print("\t show -g")
 
 def writeBlif(command, verbose, model_name):
     # ensure the argument is valid
