@@ -52,7 +52,7 @@ abctime s_ResynTime = 0;
 ////////////////////////////////////////////////////////////////////////
 ///                     FUNCTION DEFINITIONS                         ///
 ////////////////////////////////////////////////////////////////////////
-
+void als_Find_Save_CL(Abc_Ntk_t* pNtk);
 /**Function*************************************************************
 
   Synopsis    [If the network is best, saves it in "best.blif" and returns 1.]
@@ -162,6 +162,8 @@ double Abc_NtkMemory( Abc_Ntk_t * p )
 ***********************************************************************/
 float Abc_NtkMfsTotalSwitching( Abc_Ntk_t * pNtk )
 {
+    //this function is modified by Ghasem
+
     extern Aig_Man_t * Abc_NtkToDar( Abc_Ntk_t * pNtk, int fExors, int fRegisters );
     extern Vec_Int_t * Saig_ManComputeSwitchProbs( Aig_Man_t * p, int nFrames, int nPref, int fProbOne );
     Vec_Int_t * vSwitching;
@@ -172,6 +174,10 @@ float Abc_NtkMfsTotalSwitching( Abc_Ntk_t * pNtk )
     Abc_Obj_t * pObjAbc, * pObjAbc2;
     float Result = (float)0;
     int i;
+
+    //calc and save CL before it's gone!
+    als_Find_Save_CL(pNtk);
+
     // strash the network
     pNtkStr = Abc_NtkStrash( pNtk, 0, 1, 0 );
     Abc_NtkForEachObj( pNtk, pObjAbc, i )
@@ -185,7 +191,8 @@ float Abc_NtkMfsTotalSwitching( Abc_Ntk_t * pNtk )
     {
         if ( (pObjAbc2 = Abc_ObjRegular((Abc_Obj_t *)pObjAbc->pTemp)) && (pObjAig = Aig_Regular((Aig_Obj_t *)pObjAbc2->pTemp)) )
         {
-            Result += Abc_ObjFanoutNum(pObjAbc) * pSwitching[pObjAig->Id];
+            //Result += Abc_ObjFanoutNum(pObjAbc) * pSwitching[pObjAig->Id];
+            Result += pObjAbc->CL * pSwitching[pObjAig->Id];
 //            Abc_ObjPrint( stdout, pObjAbc );
 //            printf( "%d = %.2f\n", i, Abc_ObjFanoutNum(pObjAbc) * pSwitching[pObjAig->Id] );
         }

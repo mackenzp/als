@@ -148,6 +148,7 @@ struct Abc_Obj_t_     // 48/72 bytes (32-bits/64-bits)
       Abc_Obj_t *     pCopy;         // the copy of this object
       int             iTemp;
       float           dTemp; };
+    double CL;                      //out cap
 };
 
 struct Abc_Ntk_t_ 
