@@ -43,7 +43,7 @@ prints switching activities of nodes
 ////////////////////////////////////////////////////////////////////////
 
 static int SPORT_printSwitchingCommand  ( Abc_Frame_t * pAbc, int argc, char ** argv );
-
+double FindCLNode(Abc_Obj_t * pNode);
 //==========================================================================================================================
 
 void printSwitching_Init( Abc_Frame_t * pAbc )
@@ -56,6 +56,60 @@ void printSwitching_End( Abc_Frame_t * pAbc )
 {
 
 
+}
+//==========================================================================================================================
+float SPORT_AdditionalFanoutDelay(Abc_Obj_t * pNode){
+    int i;
+    //float R_gate = 1.0/(my_Gate->dArea);
+    Abc_Obj_t * pFanout;
+    Mio_Gate_t* Current_Gate, *Fanout_Gate;
+    Mio_Pin_t * pPin, *cPin;
+	
+    float TotalFanout = 0.0;
+    float AdditionalDelayDueToFanout = 0.0;
+	
+    Abc_ObjForEachFanout( pNode, pFanout, i ){
+        if(Abc_ObjIsNode(pFanout)){
+            Fanout_Gate = pFanout->pData;
+            pPin = Mio_GateReadPins(Fanout_Gate);
+            TotalFanout += pPin->dLoadInput;	
+        }
+    }
+	
+    Current_Gate = pNode->pData;
+    cPin = Mio_GateReadPins(Current_Gate);
+    AdditionalDelayDueToFanout = (cPin->dDelayFanoutRise)*TotalFanout;
+    return (AdditionalDelayDueToFanout);
+}
+//==========================================================================================================================
+double als_Find_CL_Node(Abc_Obj_t * pNode){
+    //finding total output capacitance of pNode
+    int i;
+    Abc_Obj_t * pFanout;
+    Mio_Gate_t *Fanout_Gate; // = (Mio_Gate_t *)ABC_ALLOC( Mio_Gate_t, 1);
+    Mio_Pin_t * pPin;
+	
+    double TotalFanout = 0.0;
+    //printf("here -123\n");
+    Abc_ObjForEachFanout( pNode, pFanout, i ){
+        if(Abc_ObjIsNode(pFanout)){
+            Fanout_Gate = (Mio_Gate_t *)pFanout->pData;
+            //printf("area : %f\n", Fanout_Gate->dArea);
+            pPin = Mio_GateReadPins(Fanout_Gate);
+            TotalFanout += pPin->dLoadInput;
+            //printf("%f\n", pPin->dLoadInput);	
+        }
+    }
+	
+    return TotalFanout;
+}
+//==========================================================================================================================
+void als_Find_Save_CL(Abc_Ntk_t* pNtk){
+    Abc_Obj_t* pNode;
+    int i;
+    Abc_NtkForEachNode(pNtk, pNode, i){
+        pNode->CL = als_Find_CL_Node(pNode);
+    }
 }
 //==========================================================================================================================
 float als_NtkMfsNodesSwitching( Abc_Ntk_t * pNtk )
@@ -71,9 +125,16 @@ float als_NtkMfsNodesSwitching( Abc_Ntk_t * pNtk )
     float Result = (float)0;
     float temp_s = (float)0;
     int i;
+    int j;
+    Abc_Obj_t* pFanout;    
+
+    //calc CL before mapping is gone!
+    als_Find_Save_CL(pNtk);
 
     FILE *fp = fopen("nodes_switching.txt","w");
+    FILE *fp2 = fopen("nodes_switching_fanouts.txt","w");
 
+    printf("here 1\n");
     // strash the network
     pNtkStr = Abc_NtkStrash( pNtk, 0, 1, 0 );
     Abc_NtkForEachObj( pNtk, pObjAbc, i )
@@ -88,14 +149,24 @@ float als_NtkMfsNodesSwitching( Abc_Ntk_t * pNtk )
         if ( (pObjAbc2 = Abc_ObjRegular((Abc_Obj_t *)pObjAbc->pTemp)) && (pObjAig = Aig_Regular((Aig_Obj_t *)pObjAbc2->pTemp)) )
         {
             
-            temp_s = Abc_ObjFanoutNum(pObjAbc) * pSwitching[pObjAig->Id];
+            //temp_s = Abc_ObjFanoutNum(pObjAbc) * pSwitching[pObjAig->Id];
+            temp_s = pObjAbc->CL * pSwitching[pObjAig->Id];
             fprintf(fp,"%s %f\n",Abc_ObjName(pObjAbc), temp_s);
             Result += temp_s;
+            //printing fanouts:
+            //for indexing in python code:
+            fprintf(fp2, "%s ", Abc_ObjName(pObjAbc));
+            Abc_ObjForEachFanout(pObjAbc, pFanout, j){
+                if(Abc_ObjIsNode(pFanout))
+                    fprintf(fp2,"%s ",Abc_ObjName(pFanout));
+            }
+            fprintf(fp2,"\n");
 //            Abc_ObjPrint( stdout, pObjAbc );
 //            printf( "%d = %.2f\n", i, Abc_ObjFanoutNum(pObjAbc) * pSwitching[pObjAig->Id] );
         }
     }
     fclose(fp);
+    fclose(fp2);
     Vec_IntFree( vSwitching );
     Aig_ManStop( pAig );
     Abc_NtkDelete( pNtkStr );
@@ -122,7 +193,7 @@ int SPORT_printSwitchingCommand ( Abc_Frame_t * pAbc, int argc, char ** argv )
         }
     }
 
-	
+    printf("here 0\n");	
     float total_switching = als_NtkMfsNodesSwitching(pNtk);
     printf("Total switching : %f\n", total_switching);
 

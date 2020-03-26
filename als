@@ -114,7 +114,7 @@ def mapApprox(command, power):
         else:
             if(fVerbose):
                 network.printCritPath()
-            init_delay = network.calcDelay(1)
+        init_delay = network.calcDelay(1)
         init_area = network.calcArea(1)
         start = time.time()
         if(power):
@@ -125,8 +125,9 @@ def mapApprox(command, power):
             network.areaClean(validate_error=validate_error, fVerbose=fVerbose,  max_iter=num_iterations)
         end = time.time()
         error = network.calcOutputError()
-        #repl_delay = network.calcDelay(1)
-        #repl_area = network.calcArea(1)
+        repl_delay = network.calcDelay(1)
+        repl_area = network.calcArea(1)
+        repl_power = network.calcTotalPower()
         #network.getCritPath()
         if(fVerbose):
             network.writeNodeTypes()
@@ -180,17 +181,18 @@ def mapApprox(command, power):
         print("----------------------------------")
         if(power):
             print("Initial switching power:   |  %.2f" %init_power)
-        else:
-            print("Initial Critical Delay:    | ", init_delay)
+        #else:
+        print("Initial Critical Delay:    | ", init_delay)
         print("Initial Area:              | ", init_area)
-        #print("----------------------------------")
-        #print("PreMap Critical Delay:     | ", repl_delay)
-        #print("PreMap Area:               | ", repl_area)
+        print("----------------------------------")
+        print("PreMap switching power:    |  %.2f" %repl_power)
+        print("PreMap Critical Delay:     | ", repl_delay)
+        print("PreMap Area:               | ", repl_area)
         print("----------------------------------")
         if(power):
             print("Final switching power:     |  %.2f" %total_power)
-        else:
-            print("Final Critical Delay:      | ", final_delay)
+        #else:
+        print("Final Critical Delay:      | ", final_delay)
         print("Final Area:                | ", final_area)
         print("----------------------------------")
         print("Error Rate:                | ", error)

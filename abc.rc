@@ -108,6 +108,7 @@ alias wv write_verilog
 
 #USC commands:
 alias rds read_dsd
+alias pS printSwitching
 
 # standard scripts
 alias resyn       "b; rw; rwz; b; rwz; b"

@@ -64,12 +64,29 @@ def Sort_Switchings():
                 sw_val_ret.append(tot[i][1])
                 break
     
+    # consider top 20%
+    stopping_crit = int(len(sw_val)/5)
     # consider only up to 100 cirtical nodes:
-    if(len(sw) > 100):
-        return sw[0:99], sw_val_ret[0:99]
+    #stopping_crit = 100
+    if(len(sw) > stopping_crit):
+        return sw[0:stopping_crit-1], sw_val_ret[0:stopping_crit-1]
     else:    
         return sw, sw_val_ret
             
+def getCritPowerFanoutNodes(cp):
+    #add 20% of fanout nodes to this crit_power_net list:
+    os.system("sed -i '$d' nodes_switching_fanouts.txt")
+    tot = []
+    stop_crit = 0.2
+    with open("nodes_switching_fanouts.txt", "r") as fp:
+        for line in fp:
+            line = line.rstrip()
+            line = line.lstrip()
+            tmp = line.split(" ")
+            if(tmp[0] in cp):
+                for itr in range(1,int(len(tmp)*stop_crit)):
+                    tot.append(tmp[itr])
+    return tot
 
 # class container for network approximation ------------------------------------------------
 class synthesisEngine(object):
@@ -630,7 +647,18 @@ class synthesisEngine(object):
         #run ABC for exatrcating switching activitiesL
         Generate_Switching_File()
         self.crit_power_net, self.crit_power_val = Sort_Switchings()
-        return self.crit_power_net, self.crit_power_val  
+        crit_size = len(self.crit_power_net)
+        #add 20% of fanout nodes to this crit_power_net list:
+        crit_fanouts = getCritPowerFanoutNodes(self.crit_power_net)
+        for itr in range(len(crit_fanouts)): 
+            (self.crit_power_net).append(crit_fanouts[itr])
+        return self.crit_power_net, self.crit_power_val, crit_size  
+
+    def getCritPowerNodes_print(self):
+        #run ABC for exatrcating switching activitiesL
+        Generate_Switching_File()
+        self.crit_power_net, self.crit_power_val = Sort_Switchings()
+        return self.crit_power_net, self.crit_power_val
 
 
     def printCritPath(self):
@@ -646,7 +674,7 @@ class synthesisEngine(object):
         print("\nCritical Power nodes (showing up to 20 nodes): ----")
         print('{:<7}{:<3}{:>7}'.format("Node: ", "| ", "Power(uW)"))
         print("-------------------")
-        net, val = self.getCritPowerNodes()
+        net, val = self.getCritPowerNodes_print()
         size = len(net)
         if(size > 20):
             size = 20 # print up to 20 critical nodes not more!
@@ -828,7 +856,6 @@ class synthesisEngine(object):
                 return error
 
     def smallestNode(self, gate):
-
         num_inputs = self.numInputs[gate]
         min_gate = ''
         if(num_inputs == "1"):
@@ -853,6 +880,36 @@ class synthesisEngine(object):
             for gate_type in self.lib_dict:
                 if (self.numInputs[gate_type] == '4'):
                     if (min_gate == '' or float(self.lib_dict[gate_type]['area']) < float(self.lib_dict[min_gate]['area'])):
+                        min_gate = gate_type
+            return (min_gate)
+        else:
+            print("This library only has 4 inputs")
+
+    def smallestNodeNotSlower(self, gate):
+        num_inputs = self.numInputs[gate]
+        min_gate = ''
+        if(num_inputs == "1"):
+            for gate_type in self.lib_dict:
+                if (self.numInputs[gate_type] == '1'):
+                    if (min_gate == '' or (float(self.lib_dict[gate_type]['area']) < float(self.lib_dict[min_gate]['area']) and float(self.lib_dict[gate_type]['delay']) <= float(self.lib_dict[min_gate]['delay'])) ):
+                        min_gate = gate_type
+            return (min_gate)
+        elif(num_inputs == "2"):
+            for gate_type in self.lib_dict:
+                if (self.numInputs[gate_type] == '2'):
+                    if (min_gate == '' or (float(self.lib_dict[gate_type]['area']) < float(self.lib_dict[min_gate]['area']) and float(self.lib_dict[gate_type]['delay']) <= float(self.lib_dict[min_gate]['delay'])) ):
+                        min_gate = gate_type
+            return (min_gate)
+        elif(num_inputs == "3"):
+            for gate_type in self.lib_dict:
+                if (self.numInputs[gate_type] == '3'):
+                    if (min_gate == '' or (float(self.lib_dict[gate_type]['area']) < float(self.lib_dict[min_gate]['area']) and float(self.lib_dict[gate_type]['delay']) <= float(self.lib_dict[min_gate]['delay'])) ):
+                        min_gate = gate_type
+            return (min_gate)
+        elif(num_inputs == "4"):
+            for gate_type in self.lib_dict:
+                if (self.numInputs[gate_type] == '4'):
+                    if (min_gate == '' or (float(self.lib_dict[gate_type]['area']) < float(self.lib_dict[min_gate]['area']) and float(self.lib_dict[gate_type]['delay']) <= float(self.lib_dict[min_gate]['delay'])) ):
                         min_gate = gate_type
             return (min_gate)
         else:
@@ -923,6 +980,36 @@ class synthesisEngine(object):
         else:
             print("This library only has 4 inputs")
 
+    def powerEfficientGateFanout(self, gate): # gate with less output capacitance
+        num_inputs = self.numInputs[gate]
+        min_gate = ''
+        if(num_inputs == "1"):
+            for gate_type in self.lib_dict:
+                if (self.numInputs[gate_type] == '1'):
+                    if (min_gate == '' or float(self.lib_dict[gate_type]['input_load']) < float(self.lib_dict[min_gate]['input_load'])):
+                        min_gate = gate_type
+            return (min_gate)
+        elif(num_inputs == "2"):
+            for gate_type in self.lib_dict:
+                if (self.numInputs[gate_type] == '2'):
+                    if (min_gate == '' or float(self.lib_dict[gate_type]['input_load']) < float(self.lib_dict[min_gate]['input_load'])):
+                        min_gate = gate_type
+            return (min_gate)
+        elif(num_inputs == "3"):
+            for gate_type in self.lib_dict:
+                if (self.numInputs[gate_type] == '3'):
+                    if (min_gate == '' or float(self.lib_dict[gate_type]['input_load']) < float(self.lib_dict[min_gate]['input_load'])):
+                        min_gate = gate_type
+            return (min_gate)
+        elif(num_inputs == "4"):
+            for gate_type in self.lib_dict:
+                if (self.numInputs[gate_type] == '4'):
+                    if (min_gate == '' or float(self.lib_dict[gate_type]['input_load']) < float(self.lib_dict[min_gate]['input_load'])):
+                        min_gate = gate_type
+            return (min_gate)
+        else:
+            print("This library only has 4 inputs")
+
 
     def optArea(self, gate):
         num_inputs = self.numInputs[gate[0]]
@@ -965,6 +1052,8 @@ class synthesisEngine(object):
         index_hist = []
         num_iter = 0
        
+        loop_counter = 0
+
         while(1):
             if(float(self.calcArea(1))/self.init_area <= self.area_thresh):
                 break
@@ -978,27 +1067,38 @@ class synthesisEngine(object):
             # power - alter list of replacement nodes
             # organize list of crit power nodes as list of [[a b], [c d], ...]
             #cp = self.getCritPath()
-            cp, _ = self.getCritPowerNodes()
+            cp, _, cp_size = self.getCritPowerNodes()
+            #print(cp)
             cp_new = []
             for item in cp:
                 temp_list = [item, 0]
                 cp_new.append(temp_list)
             cp = cp_new
-
+            cp_delay = self.getCritPath()
             # get the first gate that hasnt been changed on the critical path
             if(cp):
                 firstgate = cp.pop(-1)
-            while(firstgate[0] in self.nodes_changed):
+            while(firstgate[0] in cp_delay):
                 if(cp):
                     firstgate = cp.pop(-1)
                 else:
                     break
+            if(cp):
+                while(firstgate[0] in self.nodes_changed):
+                    if(cp):
+                        firstgate = cp.pop(-1)
+                    else:
+                        break
             # get the index of the gate in the network // temp is a list
             temp = self.network_lookup[firstgate[0]]
             # make a copy of the gate in case the error constraint is violated
             orig_gate = copy.deepcopy(self.node_by_level[temp[0]][temp[1]])
-            # replace the gate in the network with the fastest gate
-            efficient_gate = self.powerEfficientGate(orig_gate[0])
+            # replace crit power node with one with smaller out cap 
+            # if it is a fanout of a crit node, replace it with a gate with smaller input cap
+            if(loop_counter < cp_size):
+                efficient_gate = self.powerEfficientGate(orig_gate[0])
+            else:
+                efficient_gate = self.powerEfficientGateFanout(orig_gate[0])
 
 
             if (efficient_gate != orig_gate[0]):
@@ -1045,10 +1145,11 @@ class synthesisEngine(object):
                 break
             if (int(num_iter) > int(max_iter)):
                 break
+            loop_counter += 1
 
         #node_hist = []
         #index_hist = []
-
+        #loop_counter = 0
         while (1):
             if(float(self.calcArea(1))/self.init_area <= self.area_thresh):
                 break
@@ -1060,7 +1161,8 @@ class synthesisEngine(object):
             # cp is the list of the critical path
             #cp = self.getCritPath()
 
-            cp, _ = self.getCritPowerNodes()
+            cp, _, cp_size = self.getCritPowerNodes()
+            cp_delay = self.getCritPath()
             # organize list of crit power nodes as list of [[a b], [c d], ...]
             cp_new = []
             for item in cp:
@@ -1069,13 +1171,19 @@ class synthesisEngine(object):
             cp = cp_new
 
             # get the first gate that hasnt been changed on the critical path
-            if (cp):
+            if(cp):
                 firstgate = cp.pop(0)
-            while ("nand" not in firstgate[0]):
-                if (cp):
+            while(firstgate[0] in cp_delay):
+                if(cp):
                     firstgate = cp.pop(0)
                 else:
                     break
+            if(cp):
+                while("nand" not in firstgate[0]):
+                    if(cp):
+                        firstgate = cp.pop(0)
+                    else:
+                        break
             #print(firstgate)
             # get the index of the gate in the network // temp is a list
             temp = self.network_lookup[firstgate[0]]
@@ -1331,7 +1439,7 @@ class synthesisEngine(object):
                     gate = self.node_by_level[level][i]
                     if (gate[3] not in self.nodes_changed and gate[0] != "one" and gate[0] != "zero"):
                         orig_gate = copy.deepcopy(gate)
-                        faster_gate = self.smallestNode(orig_gate[0])
+                        faster_gate = self.smallestNodeNotSlower(orig_gate[0])
                         #faster_gate = self.optArea(orig_gate)
                         if (orig_gate[0] != faster_gate):
                             self.node_by_level[level][i][0] = faster_gate
