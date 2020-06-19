@@ -11,8 +11,8 @@ import os
 import copy
 import time
 
-from synthesisEngine import synthesisEngine
-from Utils import printInit, initFiles, getCommand, writeRuntxt, writeRuntxt_power, runABC, checkABCError, is_float, printHelp, writeBlif, printError, trainDNN, setLib, del_unnecessary_files
+from pyscripts.synthesisEngine import synthesisEngine
+from pyscripts.Utils import printInit, initFiles, getCommand, writeRuntxt, writeRuntxt_power, runABC, checkABCError, is_float, printHelp, writeBlif, printError, trainDNN, setLib, del_unnecessary_files
 from shutil import rmtree
 #====================================global varaibales======================================
 model_name_file = "temp__blif.blif"
@@ -92,9 +92,9 @@ def mapApprox(command, power):
     map_end = time.time()
 
     # extracts information about the nodes for approximate synthesis
-    extract_command = "python3 blif_to_custom_bench.py > original.bench"
+    extract_command = "python3 pyscripts/blif_to_custom_bench.py > original.bench"
     os.system(extract_command)
-    extract_command = "python3 node_extract.py original.bench"
+    extract_command = "python3 pyscripts/node_extract.py original.bench"
     os.system(extract_command)
 
     # checks that the filename is correct and that ABC was able to successfully map
@@ -133,13 +133,13 @@ def mapApprox(command, power):
             network.writeNodeTypes()
 
         # get the error at all outputs
-        command = "./error -all"
+        command = "error/error -all"
         os.system(command)
 
         #start = time.time()
-        system_call = "python3 node_types_to_blif.py"
+        system_call = "python3 pyscripts/node_types_to_blif.py"
         os.system(system_call)
-        system_call = "python3 custom_bench_to_blif.py original.bench > temp.blif"
+        system_call = "python3 pyscripts/custom_bench_to_blif.py original.bench > temp.blif"
         os.system(system_call)
         
         #running ABC for the last time for final optimization:
@@ -149,9 +149,9 @@ def mapApprox(command, power):
             writeRuntxt("temp.blif")
         runABC()
 
-        extract_command = "python3 blif_to_custom_bench.py > original.bench"
+        extract_command = "python3 pyscripts/blif_to_custom_bench.py > original.bench"
         os.system(extract_command)
-        extract_command = "python3 node_extract.py original.bench"
+        extract_command = "python3 pyscripts/node_extract.py original.bench"
         os.system(extract_command)
         os.system("rm temp.blif")
         #end = time.time()
@@ -216,8 +216,8 @@ def mapExact(command):
     writeRuntxt(command)
     runABC()
     # write to original.bench in case user wants to write_blif
-    os.system("python3 blif_to_custom_bench.py > original.bench")
-    extract_command = "python3 node_extract.py original.bench"
+    os.system("python3 pyscripts/blif_to_custom_bench.py > original.bench")
+    extract_command = "python3 pyscripts/node_extract.py original.bench"
     os.system(extract_command)
 
     print("\nExact Network:")
@@ -231,7 +231,7 @@ def mapExact(command):
     final_delay = network.calcDelay(1)
     final_area = network.calcArea(1)
     total_power = network.calcTotalPower()
-    command = "./error -all"
+    command = "error/error -all"
     os.system(command)
     print("\nNetwork has been mapped with:")
     print("Final switching power:     |  %.2f" %total_power)
@@ -282,7 +282,7 @@ def commandHandler(command):
     elif ("show -g" in command):
         print("Before calling this command, write_blif should have been invoked!")
         file = open("run.txt", "w")
-        file.write("read_library techlib.genlib \n")
+        file.write("read_library tech_lib/techlib.genlib \n")
         file.write("read " + model_name_file + "\n")
         file.write("show -g\n")
         file.close()
@@ -293,6 +293,7 @@ def commandHandler(command):
 
 # ------------------------------------------------------------------------------------------
 def main():
+    os.system("cp abc/abc.rc .")
     initFiles()  
     if len(sys.argv) == 1:
      printInit()
