@@ -1,6 +1,6 @@
 ![Deep-PowerX](Deep-PowerX.PNG)
 
-Note:  
+Note:
 - Deep-PowerX should run on any version of Linux.
 
 
