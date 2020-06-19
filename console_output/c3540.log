@@ -1,5 +1,0 @@
-ABC command line: "source run.txt".
-
-Entered genlib library with 24 gates from file "mcnc.genlib".
-Warning: The network was strashed and balanced before mapping.
-The set has more than 500 nodes. DOT file is not written.
