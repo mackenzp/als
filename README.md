@@ -1,20 +1,4 @@
-=========================================================================================
-
-  ____                             ____                           __  __
- |  _ \   ___   ___  _ __         |  _ \  ___ __      __ ___  _ __\ \/ /
- | | | | / _ \ / _ \| '_ \  _____ | |_) |/ _ \\ \ /\ / // _ \| '__|\  / 
- | |_| ||  __/|  __/| |_) ||_____||  __/| (_) |\ V  V /|  __/| |   /  \ 
- |____/  \___| \___|| .__/        |_|    \___/  \_/\_/  \___||_|  /_/\_\
-                    |_|                                                 
-
-
-   SPORT Lab, University of Southern California, Los Angeles, CA 90089 
-                       http://sportlab.usc.edu/                            
-
-
-A Deep Learning-Based Framework for Low-Power Approximate Logic Synthesis
-
-=========================================================================================
+![Deep-PowerX](Deep-PowerX.PNG)
 
 Note:
 - Deep-PowerX should run on any version of Linux.
@@ -32,14 +16,14 @@ ALS utilizes Berkeley's open-source synthesis tool "ABC" as a base platform for 
 The modified version of ABC is compiled, but to re-compile ABC type 'make clean' and then 'make'.
 
 ## Example
-`[~/als, master+25]: ./als`  
-`Using TensorFlow backend.`  
-`USC Approximate Logic Synthesis Suite v1.0`  
-`For a list of commands, please type "help"`  
-`als > map_approx benchfolder/ISCAS85/c1196.bench 0.05`  
-`.`  
-`.`  
-`.`  
+`[~/als, master+25]: ./als` 
+`Using TensorFlow backend.` 
+`USC Approximate Logic Synthesis Suite v1.0` 
+`For a list of commands, please type "help"` 
+`als > map_approx benchfolder/ISCAS85/c1196.bench 0.05` 
+`.` 
+`.` 
+`.` 
 
 <br>
 
