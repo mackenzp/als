@@ -10,7 +10,7 @@ The approximation algorithm in Deep-PowerX aims to first reduce the total switch
 ![Flowchart](Flowchart.PNG)
 
 ## Installation
-- Make sure that you are using python3.6 or newer (written using python 3.6.7)
+- Make sure that you are using python3.6 (written using python 3.6.7)
 - Install pip using the following: `sudo apt install python3-pip`
 - Install required packages using the following: `pip3 install -r requirements`
 
