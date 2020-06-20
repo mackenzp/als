@@ -29,7 +29,7 @@ The modified version of ABC is compiled, but to re-compile ABC type 'make clean'
 
 `For a list of commands, please type "help"` 
 
-`als > map_approx benchfolder/ISCAS85/c1196.bench 0.05` 
+`als > map_approx benchmarks/c432.bench -r 0.05 -p` 
 
 `.` 
 
