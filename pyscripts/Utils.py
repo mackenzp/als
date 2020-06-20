@@ -90,11 +90,11 @@ def copyDirectory(src, dest):
 
 def del_unnecessary_files():
     os.system("rm abc.rc")
-    os.system("rm *.dot > /dev/null")
-    os.system("rm *.txt > /dev/null")
-    os.system("rm *.log > /dev/null")
-    os.system("rm *.bench > /dev/null")
-    os.system("rm *.blif > /dev/null")
+    os.system("rm *.dot > /dev/null 2>&1")
+    os.system("rm *.txt > /dev/null 2>&1")
+    os.system("rm *.log > /dev/null 2>&1")
+    os.system("rm *.bench > /dev/null 2>&1")
+    os.system("rm *.blif > /dev/null 2>&1")
     command = "ls .model* > /dev/null 2>&1"
     if (os.system(command) == 0):
         os.system("rm .model* > /dev/null")
@@ -110,7 +110,8 @@ def del_unnecessary_files():
 # prints the possible commands that can be run for the user --------------------------------
 def printHelp(): 
     print("\tSynthesize Command(s):")
-    print("\t map_approx    <file_path (.blif or .bench)>   <error constraint (0 - 1.0)>")
+    print("\t map_approx    <file_path (.blif or .bench)>  -r <error constraint (0 - 1.0)>")
+    print("\t                                              -p (for power optimization)")
     print("\t map_exact     <file_path (.blif or .bench)>")
     print("\t read_library  <library name (.genlib)>")
     print("\n")
