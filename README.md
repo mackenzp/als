@@ -10,9 +10,9 @@ The approximation algorithm in Deep-PowerX aims to first reduce the total switch
 ![Flowchart](Flowchart.PNG)
 
 ## Installation
-- Make sure that you are using python3.6 or newer (written using python 3.6.7)
+- Make sure that you are using python3.6 for the installation to work properly (written using python 3.6.7)
 - Install pip using the following: `sudo apt install python3-pip`
-- Install required packages using the following: `pip3 install -r requirements.txt`
+- Install required packages using the following: `pip3 install -r requirements`
 
 Type './als' to run the als executable
 
@@ -22,12 +22,19 @@ The modified version of ABC is compiled, but to re-compile ABC type 'make clean'
 
 ## Example
 `[~/als, master+25]: ./als` 
+
 `Using TensorFlow backend.` 
+
 `USC Approximate Logic Synthesis Suite v1.0` 
+
 `For a list of commands, please type "help"` 
-`als > map_approx benchfolder/ISCAS85/c1196.bench 0.05` 
+
+`als > map_approx benchmarks/c432.bench -r 0.05 -p` 
+
 `.` 
+
 `.` 
+
 `.` 
 
 <br>
