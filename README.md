@@ -15,12 +15,11 @@ The approximation algorithm in Deep-PowerX aims to first reduce the total switch
 - Install pip using the following: `sudo apt install python3-pip`
 - Install required packages using the following: `python3.6 -m pip install -r requirements`
 - To compile the required executables, type `make`
-
-Type './als' to run the als executable
+- Type `./als` to run the als executable
 
 ## Recompiling ABC:
 ALS utilizes Berkeley's open-source synthesis tool "ABC" as a base platform for initial exact technology mapping and feature extraction.
-The modified version of ABC is compiled, but to re-compile ABC type 'make clean' and then 'make'.
+The modified version of ABC is compiled, but to re-compile ABC type `make clean` and then `make`.
 
 ## Example
 `[~/als, master+25]: ./als` 
