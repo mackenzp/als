@@ -11,6 +11,7 @@ The approximation algorithm in Deep-PowerX aims to first reduce the total switch
 
 ## Installation
 - Make sure that you are using python3.6 for the installation to work properly (written using python 3.6.7)
+    - Install python3.6 using the following: `sudo apt install python3.6`
 - Install pip using the following: `sudo apt install python3-pip`
 - Install required packages using the following: `python3.6 -m pip install -r requirements`
 
