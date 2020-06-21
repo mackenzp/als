@@ -1471,14 +1471,10 @@ class synthesisEngine(object):
                             node_hist.append(orig_gate)
                             index_hist.append(temp)
 
-                            self.dnnGetError(self.getNode(orig_gate), faster_gate, validate_error)
+                            self.dnnGetError(self.getNode(orig_gate), faster_gate, 1)
 
                             count = count + 1
                             if (float(self.current_avg_error) > self.error_constraint):
-                                if (validate_error):
-                                    self.calcOutputError()
-                                else:
-                                    continue
                                 while (float(self.current_avg_error) > self.error_constraint):
                                     if (len(node_hist) != 0):
                                         orig_gate = node_hist.pop()
