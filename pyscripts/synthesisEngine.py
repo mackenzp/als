@@ -1089,6 +1089,9 @@ class synthesisEngine(object):
             # get the first gate that hasnt been changed on the critical path
             if(cp):
                 firstgate = cp.pop(-1)
+            else:
+                break
+
             while(firstgate[0] in cp_delay):
                 if(cp):
                     firstgate = cp.pop(-1)
@@ -1184,6 +1187,9 @@ class synthesisEngine(object):
             # get the first gate that hasnt been changed on the critical path
             if(cp):
                 firstgate = cp.pop(0)
+            else:
+                break
+            
             while(firstgate[0] in cp_delay):
                 if(cp):
                     firstgate = cp.pop(0)
