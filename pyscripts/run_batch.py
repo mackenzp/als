@@ -7,17 +7,17 @@
 #
 # fixes/improvements:
 #herrerab@usc.edu 
-# initial version feb 19 2020. 
-# added folder checking and creation march 7 2020.
-# adding a short version, log version -l march 9 2020.
+# initial version February 19 2020. 
+# added folder checking and creation March 7 2020.
+# adding a short version, log version -l March 9 2020.
+# updated to changes June 20,2020.
 #
 import os, sys, glob
 from Utils import printInit
 #printInit()
 print("\nALS suite.\n\nrun_bach script.\n\nRuns an ALS command on all files inside the selected folder (.bench and .blif).\nSaves execution output in different text files in an existent folder.\n\n")
 #
-#print(sys.argv[1])
-if (len(sys.argv) > 1): #[1] == "-l"):
+if (len(sys.argv) > 1):
  print("Executing long version \n")
  l = 1
 else:
@@ -27,8 +27,8 @@ else:
  command_p = "map_approx"
  parameters = "-r 0.05 -a -p -i 10"
  print("-----------------------\nshort version \n-----------------------\nRunning Defaults: \n")
- print("Library: " + library + "\nFolder to write results: " + folder_to_write + " Note: Previous files will be erased!")
- print("Command: " + command_p + parameters + " \n")
+ print("Library: " + library + "\nFolder to write results: " + folder_to_write + " (Note: Previous results will be erased!)")
+ print("Command to be run: " + command_p + parameters + " \n")
  #
 working_directory= str(os.getcwd())
 if (l == 1):
@@ -39,18 +39,16 @@ print(command)
 os.system(command)
 cont = 0
 while (cont ==0):
- folder_to_read= input("Folder path to read(e.g. Nested in benchfolder: e.g. ISCAS85/: ")
-# file_extension= input("files extension (e.g. bench): ")
+ folder_to_read= input("Folder path to read (Example: benchmarks): ")
  if (folder_to_read[-1] != "/"):
   folder_to_read = folder_to_read+"/"
- if (os.path.isdir(working_directory+"/benchfolder/"+folder_to_read) == True):
-  folder_to_read = "benchfolder/"+folder_to_read
-  #files=glob.glob(folder_to_read + "*." + file_extension,recursive=True)
+ print("folder to read files is: "+folder_to_read)
+ print("working directory is: "+working_directory)
+ if (os.path.isdir(working_directory+"/"+folder_to_read) == True):
+  folder_to_read = working_directory+"/"+folder_to_read 
+  print("folder to read files is: "+folder_to_read)
   files_bench=glob.glob(folder_to_read + "*.bench",recursive=True)
   files_blif=glob.glob(folder_to_read + "*.blif",recursive=True)
-  #print(files)
-  #file_list={x.replace(folder_to_read, '') for x in files}
-  #print(file_list)
   file_list_bench={x.replace(folder_to_read, '') for x in files_bench}
   file_list_blif={x.replace(folder_to_read, '') for x in files_blif}
 #  print(file_list_bench)
@@ -78,7 +76,7 @@ while (cont == 0):
 cont = 0
 while (cont == 0):
  if (l == 1):
-  folder_to_write= input("path to output folder (e.g. results/ISCAS85/): ")
+  folder_to_write= input("Path to results (Example: results/ISCAS85/): ")
   if (folder_to_write[-1] != "/"):
    folder_to_write=folder_to_write+"/"
  else:
@@ -86,7 +84,6 @@ while (cont == 0):
 #
 #checking the destination folder
 #
-#print(os.path.isdir(working_directory+"/"+folder_to_write))
  dest_dir = working_directory+"/"+folder_to_write
  if (os.path.isdir(dest_dir) == True):
   print(dest_dir+" exists, saving results inside.")
@@ -98,7 +95,7 @@ while (cont == 0):
    else:
     cont = 1
    if (cont == 1):
-   # erasing files inside destination folder   
+# erasing files inside destination folder   
     filestoremove = [os.path.join(dest_dir,fil) for fil in os.listdir(dest_dir)]
     for fil in filestoremove:
      os.remove(fil)   
@@ -111,11 +108,8 @@ while (cont == 0):
   else:
    print (working_directory+"/"+folder_to_write+" creation unsuccesful. Please fix this and try again.")
    cont = 0
-#command="./als 'map_approx benchfolder/ISCAS85/c880.bench 0.05 -p' >> test_1.txt"
-#exit()
 file_index = 0
 #
-#files=glob.glob(folder_to_read + "*." + file_extension,recursive=True)
 files = files_bench + files_blif
 #print(files)
 file_list={x.replace(folder_to_read, '') for x in files}
@@ -128,10 +122,14 @@ print("Files to be processed: "+str(total_files)+"\n")
 for file_name in file_list:
  file_index = file_index + 1
  print("\nExecuting file "+ str(file_index) + " out of " + str(total_files))
- print("Working on ..."+ str(file_name))
- temp = file_name.split(".")
- command = "./als '" + str(command_p) + " " + folder_to_read + file_name + " " + str(parameters) + "' >> " + str(folder_to_write) + temp[0] + "_out.txt"
- print(command)
- os.system(command)
+ print("Checking "+ str(file_name))
+ if (str(file_name) == "c17.bench"):
+  print ("c17.bench skipped, it is a very small circuit!")
+ else:
+  print("Working on ..."+ str(file_name))
+  temp = file_name.split(".")
+  command = "./als '" + str(command_p) + " " + folder_to_read + file_name + " " + str(parameters) + "' >> " + str(folder_to_write) + temp[0] + "_out.txt"
+  print(command)
+  os.system(command)
 print("done")
 exit()
