@@ -26,6 +26,13 @@ from keras.models import Sequential
 from keras.models import load_model
 from .Utils import writeBlif
 
+#set DNN seed for consistent results
+from numpy.random import seed
+seed(1)
+
+# file I/O
+from os import path
+
 #=======================================some utility functions:
 def Generate_Switching_File():
     with open("run_sw.txt", "w") as fp:
@@ -568,9 +575,13 @@ class synthesisEngine(object):
                     power_extracted = 1
                     break
         '''
-        with open("power_log.txt", "r") as fp:
-            for line in fp:
-                line = line.rstrip()
+        # check if power_log.txt generated
+        if (path.exists("power_log.txt")):
+            with open("power_log.txt", "r") as fp:
+                for line in fp:
+                    line = line.rstrip()
+        else:
+            line = 0
 
         total_power = float(line)
         total_power *= 2.16 # to convert it to uW

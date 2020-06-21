@@ -138,9 +138,9 @@ def writeBlif(command, verbose, model_name):
         print("ERROR: invalid filetype for write_blif\n")
         return
     
-    system_call = "python3 pyscripts/node_types_to_blif.py"
+    system_call = "python3.6 pyscripts/node_types_to_blif.py"
     os.system(system_call)
-    system_call = "python3 pyscripts/custom_bench_to_blif.py original.bench >" + command
+    system_call = "python3.6 pyscripts/custom_bench_to_blif.py original.bench >" + command
     os.system(system_call)
     if(verbose):
         print("Successfully wrote mapped network to", command)
@@ -177,11 +177,11 @@ def trainDNN():
     print("\n")
     if(train == "Y" or train == "y"):
         # execute training process
-        extract_data = "python3 extract_all_features.py"
+        extract_data = "python3.6 extract_all_features.py"
         os.system(extract_data)
-        convert_to_npz = "python3 data_to_npz.py"
+        convert_to_npz = "python3.6 data_to_npz.py"
         os.system(convert_to_npz)
-        train_dnn = "python3 error_training_DNN.py"
+        train_dnn = "python3.6 error_training_DNN.py"
         os.system(train_dnn)
         return
     else:

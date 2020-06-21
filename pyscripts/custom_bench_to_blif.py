@@ -4,7 +4,7 @@ import copy
 # Contact:  mackenzp@usc.edu
 # Purpose:  Converts "custom mapped" .bench to .blif file.
 # Note:     Please output redirect to (custom_name).blif for use-case application
-# Example:  python3 custom_bench_to_blif.py > (custom_name).blif
+# Example:  python3.6 custom_bench_to_blif.py > (custom_name).blif
 
 library = {"inv1":"1", "inv2":"1", "inv3":"1", "inv4":"1",\
            "nand2":"2", "nand3":"3", "nand4":"4",\

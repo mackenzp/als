@@ -1,4 +1,4 @@
-#!/usr/bin/python3
+#!/usr/bin/python3.6
 
 # Author(s): Mackenzie Peterson
 # Description:  This file acts as the user control for DNN training, approximate synthesis,
@@ -92,9 +92,9 @@ def mapApprox(command, power):
     map_end = time.time()
 
     # extracts information about the nodes for approximate synthesis
-    extract_command = "python3 pyscripts/blif_to_custom_bench.py > original.bench"
+    extract_command = "python3.6 pyscripts/blif_to_custom_bench.py > original.bench"
     os.system(extract_command)
-    extract_command = "python3 pyscripts/node_extract.py original.bench"
+    extract_command = "python3.6 pyscripts/node_extract.py original.bench"
     os.system(extract_command)
 
     # checks that the filename is correct and that ABC was able to successfully map
@@ -137,9 +137,9 @@ def mapApprox(command, power):
         os.system(command)
 
         #start = time.time()
-        system_call = "python3 pyscripts/node_types_to_blif.py"
+        system_call = "python3.6 pyscripts/node_types_to_blif.py"
         os.system(system_call)
-        system_call = "python3 pyscripts/custom_bench_to_blif.py original.bench > temp.blif"
+        system_call = "python3.6 pyscripts/custom_bench_to_blif.py original.bench > temp.blif"
         os.system(system_call)
         
         #running ABC for the last time for final optimization:
@@ -149,9 +149,9 @@ def mapApprox(command, power):
             writeRuntxt("temp.blif")
         runABC()
 
-        extract_command = "python3 pyscripts/blif_to_custom_bench.py > original.bench"
+        extract_command = "python3.6 pyscripts/blif_to_custom_bench.py > original.bench"
         os.system(extract_command)
-        extract_command = "python3 pyscripts/node_extract.py original.bench"
+        extract_command = "python3.6 pyscripts/node_extract.py original.bench"
         os.system(extract_command)
         os.system("rm temp.blif")
         #end = time.time()
@@ -216,8 +216,8 @@ def mapExact(command):
     writeRuntxt(command)
     runABC()
     # write to original.bench in case user wants to write_blif
-    os.system("python3 pyscripts/blif_to_custom_bench.py > original.bench")
-    extract_command = "python3 pyscripts/node_extract.py original.bench"
+    os.system("python3.6 pyscripts/blif_to_custom_bench.py > original.bench")
+    extract_command = "python3.6 pyscripts/node_extract.py original.bench"
     os.system(extract_command)
 
     print("\nExact Network:")

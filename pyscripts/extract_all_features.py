@@ -74,17 +74,17 @@ for benchFile in benchfilenames:
 
     # - run the python script blif_to_custom_bench.py
     #   to convert the mapped blif file to a custom "mapped" bench file
-    command = "python3 blif_to_custom_bench.py > original.bench"
+    command = "python3.6 blif_to_custom_bench.py > original.bench"
     os.system(command)
 
     # - run the python script node_extract.py with the original.bench
     #   this extracts nodes and edges for error traversal
     #   +   writes to node_edges.txt and node_type.txt
-    command = "python3 node_extract.py original.bench"
+    command = "python3.6 node_extract.py original.bench"
     os.system(command)
 
     # - run error_control
-    command = "python3 error_control.py"
+    command = "python3.6 error_control.py"
     os.system(command)
     filecount = filecount + 1
     print("\n")
