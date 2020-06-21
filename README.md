@@ -14,6 +14,7 @@ The approximation algorithm in Deep-PowerX aims to first reduce the total switch
     - Install python3.6 using the following: `sudo apt install python3.6`
 - Install pip using the following: `sudo apt install python3-pip`
 - Install required packages using the following: `python3.6 -m pip install -r requirements`
+- To compile the required executables, type `make`
 
 Type './als' to run the als executable
 
