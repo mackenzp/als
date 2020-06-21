@@ -39,9 +39,9 @@ def runABC():
 command = "benchfolder/EPFL/random_control/ctrl.blif"
 writeRuntxt(command)
 runABC()
-command = "python3 pyscripts/blif_to_custom_bench.py > original.bench"
+command = "python3.6 pyscripts/blif_to_custom_bench.py > original.bench"
 os.system(command)
-command = "python3 pyscripts/node_extract.py original.bench"
+command = "python3.6 pyscripts/node_extract.py original.bench"
 os.system(command)
 
 
