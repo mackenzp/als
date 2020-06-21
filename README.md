@@ -208,3 +208,8 @@ with 10 fanout nodes or less, we would still be considering roughly 98% of all n
 benchmark files. This would greatly reduce the size of our feature input vector to the
 DNN.
 
+### run_batch.py
+Invoqued without arguments, runs a test command over all .bench or .blif files inside the user provided benchmarks folder. When finish, saves execution output inside default results folder. Test parameters can be changed in lines 27 - 29.
+If the script is invoked including any argument word, starts an user interactive menu to configure and confirm parameters. 
+
+
