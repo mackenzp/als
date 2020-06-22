@@ -1,0 +1,16 @@
+run-time (seconds): 2.517985
+Results:
+----------------------------------
+Initial switching power:   |  338.29
+Initial Critical Delay:    |  21.9
+Initial Area:              |  519.0
+----------------------------------
+PreMap switching power:    |  341.09
+PreMap Critical Delay:     |  21.9
+PreMap Area:               |  516.0
+----------------------------------
+Final switching power:     |  259.51
+Final Critical Delay:      |  31.8
+Final Area:                |  400.0
+----------------------------------
+Error Rate:                |  0.122625
