@@ -6,7 +6,9 @@
 #           algorithm that the proposed change is within the allowed error threshold.
 #           Goal is to design the DNN to be able to be utilized with many
 #           different synthesis strategies or techniques.
-# Example:
+#
+# Modifications to set fixed seed to numpy:
+# herrerab@usc.edu check changes marked MH. June 21 2020.
 
 import os
 import copy
@@ -18,6 +20,9 @@ from operator import itemgetter
 
 # for the dnn
 import numpy as np
+# MH
+np.random.seed(1001)
+#
 import logging
 # supresses tensorflow print statements during implementation
 logging.getLogger('tensorflow').setLevel(logging.ERROR)

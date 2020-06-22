@@ -1,6 +1,12 @@
+#
+# Modifications to set fixed seed to numpy:
+# herrerab@usc.edu check changes marked MH. June 21 2020.
+
 import os
 import numpy as np
-
+# MH
+np.random.seed(1001)
+#
 print("\nIn order for this code to run, you will need to modify src/base/abc/abcShow.c and enable fanout stats")
 print("You will then have to \"make clean\" and then \"make\" in the /als directory to recompile abc")
 

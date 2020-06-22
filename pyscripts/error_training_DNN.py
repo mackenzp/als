@@ -4,7 +4,14 @@ Created on Fri Apr  5 14:38:17 2019
 
 @author: ksouv
 """
+#
+# Modifications to set fixed seed to numpy:
+# herrerab@usc.edu check changes marked MH. June 21 2020.
+
 import numpy as np
+# MH
+np.random.seed(1001)
+#
 from sklearn.preprocessing import LabelEncoder
 
 from keras.models import Sequential

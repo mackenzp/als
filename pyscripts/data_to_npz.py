@@ -4,7 +4,13 @@ Created on Tue Mar 26 08:48:09 2019
 
 @author: ksouvik
 """
+#
+# Modifications to set fixed seed to numpy:
+# herrerab@usc.edu check changes marked MH. June 21 2020.
 import numpy as np
+# MH
+np.random.seed(1001)
+#
 import sys
 trainfile = 'error_train.npz'
 filename = 'train_dnn.txt'

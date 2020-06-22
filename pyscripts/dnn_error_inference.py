@@ -4,6 +4,9 @@ Created on Sun Apr  7 16:09:56 2019
 
 @author: Souvik Kundu
 """
+#
+# Modifications to set fixed seed to numpy:
+# herrerab@usc.edu check changes marked MH. June 21 2020.
 
 #from sklearn.preprocessing import LabelEncoder
 
@@ -20,6 +23,9 @@ Created on Sun Apr  7 16:09:56 2019
 #from keras import optimizers
 
 import numpy as np
+# MH
+np.random.seed(1001)
+#
 from keras.models import Sequential
 from keras.models import load_model
 
