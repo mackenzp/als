@@ -210,7 +210,7 @@ benchmark files. This would greatly reduce the size of our feature input vector 
 DNN.
 
 ### run_batch.py
-Invoqued without arguments, runs a test command over all .bench or .blif files inside the user provided benchmarks folder. When finish, saves execution output inside default results folder. Test parameters can be changed in lines 27 - 29.
+Invoqued without arguments, runs a test command over all .bench or .blif files inside the user provided benchmarks folder. When finish, saves execution output inside default results folder. Test parameters can be changed in lines 26 to 29.
 If the script is invoked including any argument word, starts an user interactive menu to configure and confirm parameters. 
 
 
