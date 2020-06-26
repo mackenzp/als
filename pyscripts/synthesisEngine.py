@@ -18,11 +18,12 @@ import math
 import time
 from operator import itemgetter
 
-# for the dnn
+#set DNN seed for consistent results
 import numpy as np
-# MH
 np.random.seed(1001)
-#
+from numpy.random import seed
+seed(1)
+
 import logging
 # supresses tensorflow print statements during implementation
 logging.getLogger('tensorflow').setLevel(logging.ERROR)
@@ -31,9 +32,6 @@ from keras.models import Sequential
 from keras.models import load_model
 from .Utils import writeBlif
 
-#set DNN seed for consistent results
-from numpy.random import seed
-seed(1)
 
 # file I/O
 from os import path
