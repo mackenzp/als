@@ -641,6 +641,9 @@ class synthesisEngine(object):
         self.calcDelay(1)
         self.crit_path = []
         gate = self.crit_output
+        # if all nodes replaced
+        if (gate == ''):
+            return []
         while(self.curr_delay_dict[gate]):
             max = -1
             name_delay = []
